@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>mBot2 simulador</title>
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Font Awesome Kit -->
+  <script src="https://kit.fontawesome.com/256200ed53.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- BOX 1 : ESPACIO DE TRABAJO -->
+  <div class="scene">
+
+    <canvas id="canvas"></canvas>
+    <img src="robot.png" id="robot">
+
+    <!-- CONTROLES INFERIORES -->
+    <div class="scene-bottom">
+      <button id="toggleSeq">
+        <i class="fa-solid fa-eye"></i>
+      </button>
+      <div id="sequenceBox"></div>
+    </div>
+
+    <!-- LOGO -->
+    <img src="logo.png" class="scene-logo">
+
+  </div>
+
+  <!-- BOX 2 : CONTROLES -->
+  <div class="right-panel">
+
+    <h1 class="title">mBot2<br>VicuPaths</h1>
+
+    <!-- CONTROLES PLAY -->
+    <div class="controls">
+      <button id="playBtn">
+        <i class="fa-solid fa-play"></i>
+      </button>
+      <button id="stopBtn">
+        <i class="fa-solid fa-pause"></i>
+      </button>
+      <button id="resetBtn">
+        <i class="fa-solid fa-trash"></i>
+      </button>
+    </div>
+
+    <!-- DIRECCIONALES -->
+    <div class="dpad">
+      <div></div>
+      <button onclick="addAction('F','⬆')">
+        <i class="fa-solid fa-arrow-up"></i>
+      </button>
+      <div></div>
+
+      <button onclick="addAction('L','⬅')">
+        <i class="fa-solid fa-arrow-left"></i>
+      </button>
+      <button onclick="addAction('B','⬇')">
+        <i class="fa-solid fa-arrow-down"></i>
+      </button>
+      <button onclick="addAction('R','➡')">
+        <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </div>
+
+  </div>
+
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>mBot2 Simulador</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Font Awesome Kit -->
+  <script src="https://kit.fontawesome.com/256200ed53.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <!-- BOTÓN HOME -->
+  <button class="btn-home" id="homeButton" title="Inicio">
+    <i class="fa-solid fa-house"></i>
+  </button>
+    
+  <!-- ESPACIO DE TRABAJO -->
+  <div class="scene">
+    <canvas id="canvas"></canvas>
+    <img src="robot.png" id="robot">
+  </div>
+
+  <!-- CONTROLES IZQUIERDA -->
+  <div class="left-controls">
+    <button class="control-btn play-btn" id="playBtn" title="Reproducir">
+      <i class="fa-solid fa-play"></i>
+    </button>
+    <button class="control-btn pause-btn" id="stopBtn" title="Pausar">
+      <i class="fa-solid fa-pause"></i>
+    </button>
+    <button class="control-btn reset-btn" id="resetBtn" title="Reiniciar">
+      <i class="fa-solid fa-trash"></i>    </button>
+  </div>
+
+  <!-- DPAD DERECHA -->
+  <div class="dpad">
+    <button class="dpad-btn" onclick="addAction('F','⬆')" title="Adelante">
+      <i class="fa-solid fa-arrow-up"></i>
+    </button>
+    <div class="dpad-row">
+      <button class="dpad-btn" onclick="addAction('L','⬅')" title="Izquierda">
+        <i class="fa-solid fa-arrow-left"></i>
+      </button>
+      <div class="dpad-center"></div>
+      <button class="dpad-btn" onclick="addAction('R','➡')" title="Derecha">
+        <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </div>
+    <button class="dpad-btn" onclick="addAction('B','⬇')" title="Atrás">
+      <i class="fa-solid fa-arrow-down"></i>
+    </button>
+  </div>
+
+  <!-- CONTROLES INFERIORES -->
+  <div class="bottom-controls">
+    <button class="toggle-seq-btn" id="toggleSeq" title="Mostrar/Ocultar secuencia">
+      <i class="fa-solid fa-eye"></i>
+    </button>
+    <div class="sequence-box" id="sequenceBox"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

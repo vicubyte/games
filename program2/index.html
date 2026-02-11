@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>mBot2 Sim 2 - Brawl Style</title>
+  
+  <link rel="stylesheet" href="style.css" />
+  
+  <!-- Google Fonts - Brawl Stars style -->
+  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome -->
+  <script src="https://kit.fontawesome.com/256200ed53.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<!-- BOTÓN HOME -->
+<button class="btn-home" id="homeButton" title="Inicio">
+    <i class="fa-solid fa-house"></i>
+</button>
+
+<!-- BOTÓN CAMBIAR PISTA -->
+<div class="track-selector">
+  <button id="trackBtn" class="btn-track">
+    <i class="fa-solid fa-image"></i>
+  </button>
+  <div class="track-menu" id="trackMenu">
+    <button data-track="pista1.png" class="track-option">
+      <i class="fa-solid fa-trophy"></i> Pista Arena
+    </button>
+    <button data-track="pista2.png" class="track-option">
+      <i class="fa-solid fa-futbol"></i> Pista Campo
+    </button>
+    <div class="track-divider"></div>
+    <label for="customTrack" class="track-option upload-option">
+      <i class="fa-solid fa-upload"></i> Subir Pista
+      <input type="file" id="customTrack" accept="image/*" hidden />
+    </label>
+  </div>
+</div>
+
+<!-- ESCENA -->
+<div class="scene" id="scene">
+  <img src="pista1.png" class="background" id="background" alt="Pista" />
+  <canvas id="canvas"></canvas>
+  <img src="robot.png" id="robot" alt="Robot" />
+  
+  <!-- Zona de Drag & Drop -->
+  <div class="drop-zone" id="dropZone">
+    <div class="drop-zone-content">
+      <i class="fa-solid fa-cloud-arrow-up"></i>
+      <p>Arrastra una imagen aquí</p>
+      <span>o haz click en "Subir Pista"</span>
+    </div>
+  </div>
+</div>
+
+<!-- CONTROLES IZQUIERDA (AGRUPADOS VERTICALMENTE) -->
+<div class="left-controls">
+  <!-- GRUPO 1: PLAY/PAUSE/RESET -->
+  <div class="control-group">
+    <button id="playBtn" class="control-btn play-btn" title="Play">
+      <i class="fa-solid fa-play"></i>
+    </button>
+    <button id="pauseBtn" class="control-btn pause-btn" title="Pause">
+      <i class="fa-solid fa-pause"></i>
+    </button>
+    <button id="resetBtn" class="control-btn reset-btn" title="Reset">
+      <i class="fa-solid fa-trash"></i>
+    </button>
+  </div>
+  
+  <!-- ESPACIO DE SEPARACIÓN -->
+  
+  <!-- GRUPO 2: REC/SAVE -->
+  <div class="record-group">
+    <button id="recBtn" class="circle-btn rec-btn" title="Rec">
+      <i class="fa-solid fa-circle"></i>
+    </button>
+    <button id="saveBtn" class="circle-btn save-btn" title="Save">
+      <i class="fa-solid fa-floppy-disk"></i>
+    </button>
+  </div>
+</div>
+
+<!-- DPAD DERECHA -->
+<div class="dpad">
+  <button id="upBtn" class="dpad-btn dpad-up">
+    <i class="fa-solid fa-chevron-up"></i>
+  </button>
+  <div class="dpad-row">
+    <button id="leftBtn" class="dpad-btn dpad-left">
+      <i class="fa-solid fa-chevron-left"></i>
+    </button>
+    <div class="dpad-center"></div>
+    <button id="rightBtn" class="dpad-btn dpad-right">
+      <i class="fa-solid fa-chevron-right"></i>
+    </button>
+  </div>
+  <button id="downBtn" class="dpad-btn dpad-down">
+    <i class="fa-solid fa-chevron-down"></i>
+  </button>
+</div>
+
+<!-- INDICADOR DE GRABACIÓN -->
+<div class="recording-indicator" id="recordingIndicator">
+  <i class="fa-solid fa-circle"></i>
+  <span>GRABANDO...</span>
+</div>
+
+<!-- INDICADOR DE ESTADO -->
+<div class="status-indicator" id="statusIndicator">
+  Listo para grabar
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

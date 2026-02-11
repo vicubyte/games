@@ -1,80 +1,101 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <title>mBot2 simulador</title>
-  <link rel="stylesheet" href="styles.css">
-
-  <!-- Font Awesome Kit -->
-  <script src="https://kit.fontawesome.com/256200ed53.js" crossorigin="anonymous"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VicubyteGames</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <div class="container">
+        <!-- Header Section -->
+        <header class="header">
+            <div class="logo-container">
+                <img src="title.png" alt="CyberPi Suite" class="logo-image" id="logoImage">
+            </div>
+        </header>
 
-<div class="layout">
+        <!-- Programs Grid -->
+        <main class="programs-section">
+            <div class="programs-grid">
+                
+                <!-- Program 1 - LED Sequencer -->
+                <div class="program-card" data-program="1" id="program1">
+                    <div class="program-number">1</div>
+                    <div class="program-content">
+                        <div class="program-icon">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <circle cx="12" cy="12" r="6"></circle>
+                                <circle cx="12" cy="12" r="2"></circle>
+                            </svg>
+                        </div>
+                        <h2 class="program-title">Program1</h2>
+                        <p class="program-description">Crea caminos con el mBot2</p>
+                    </div>
+                    <div class="program-arrow">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </div>
+                </div>
 
-  <!-- BOX 1 : ESPACIO DE TRABAJO -->
-  <div class="scene">
+                <!-- Program 2 - Pattern Designer -->
+                <div class="program-card" data-program="2" id="program2">
+                    <div class="program-number">2</div>
+                    <div class="program-content">
+                        <div class="program-icon">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <rect x="3" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="14" width="7" height="7"></rect>
+                                <rect x="3" y="14" width="7" height="7"></rect>
+                            </svg>
+                        </div>
+                        <h2 class="program-title">Program2</h2>
+                        <p class="program-description">Mueve al mBot2 de forma libre</p>
+                    </div>
+                    <div class="program-arrow">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </div>
+                </div>
 
-    <canvas id="canvas"></canvas>
-    <img src="robot.png" id="robot">
+                <!-- Program 3 - Animation Studio -->
+                <div class="program-card" data-program="3" id="program3">
+                    <div class="program-number">3</div>
+                    <div class="program-content">
+                        <div class="program-icon">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                            </svg>
+                        </div>
+                        <h2 class="program-title">Program3</h2>
+                        <p class="program-description">Crea secuencia de luces con el CyberPi</p>
+                    </div>
+                    <div class="program-arrow">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </div>
+                </div>
 
-    <!-- CONTROLES INFERIORES -->
-    <div class="scene-bottom">
-      <button id="toggleSeq">
-        <i class="fa-solid fa-eye"></i>
-      </button>
-      <div id="sequenceBox"></div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>VicubyteGames Suite © 2026 - Herramientas de programación</p>
+        </footer>
     </div>
 
-    <!-- LOGO -->
-    <img src="logo.png" class="scene-logo">
-
-  </div>
-
-  <!-- BOX 2 : CONTROLES -->
-  <div class="right-panel">
-
-    <h1 class="title">mBot2<br>VicuPaths</h1>
-
-    <!-- CONTROLES PLAY -->
-    <div class="controls">
-      <button id="playBtn">
-        <i class="fa-solid fa-play"></i>
-      </button>
-      <button id="stopBtn">
-        <i class="fa-solid fa-pause"></i>
-      </button>
-      <button id="resetBtn">
-        <i class="fa-solid fa-trash"></i>
-      </button>
-    </div>
-
-    <!-- DIRECCIONALES -->
-    <div class="dpad">
-      <div></div>
-      <button onclick="addAction('F','⬆')">
-        <i class="fa-solid fa-arrow-up"></i>
-      </button>
-      <div></div>
-
-      <button onclick="addAction('L','⬅')">
-        <i class="fa-solid fa-arrow-left"></i>
-      </button>
-      <button onclick="addAction('B','⬇')">
-        <i class="fa-solid fa-arrow-down"></i>
-      </button>
-      <button onclick="addAction('R','➡')">
-        <i class="fa-solid fa-arrow-right"></i>
-      </button>
-    </div>
-
-  </div>
-
-</div>
-
-<script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>

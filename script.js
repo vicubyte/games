@@ -1,290 +1,247 @@
-const canvas = document.getElementById("canvas");
-const ctx = canvas.getContext("2d");
-const robotImg = document.getElementById("robot");
-
-const playBtn = document.getElementById("playBtn");
-const stopBtn = document.getElementById("stopBtn");
-const resetBtn = document.getElementById("resetBtn");
-const toggleSeqBtn = document.getElementById("toggleSeq");
-const sequenceBox = document.getElementById("sequenceBox");
-
-const scene = document.querySelector(".scene");
-
-/* =====================
-   ESCENA
-===================== */
-let SCENE_WIDTH;
-let SCENE_HEIGHT;
-
-const STEP = 80;
-const RESTART_DELAY = 500;
-
-/* =====================
-   ROBOT
-===================== */
-let startX = 0;
-let startY = 0;
-
-let robot = {
-  x: 0,
-  y: 0,
-  dir: 0 // 0↑ 1→ 2↓ 3←
+// Program URLs - CONFIGURACIÓN IMPORTANTE
+const programURLs = {
+    1: 'program1/index.html',  // LED Sequencer
+    2: 'program2/index.html',  // Pattern Designer  
+    3: 'program3/index.html'   // Animation Studio
 };
 
-let visualRotation = 0;
+// Initialize the landing page
+document.addEventListener('DOMContentLoaded', () => {
+    initializeProgramCards();
+    initializeLogoFallback();
+    addKeyboardNavigation();
+    addAnimationDelays();
+});
 
-/* =====================
-   SECUENCIA
-===================== */
-let sequence = [];
-let index = 0;
-let interval = null;
-
-/* =====================
-   CAMINO
-===================== */
-let path = [];
-let pathLocked = false;
-
-/* =====================
-   DIBUJO
-===================== */
-function crisp(v) {
-  return Math.round(v) + 0.5;
+// Initialize program cards with click handlers
+function initializeProgramCards() {
+    const programCards = document.querySelectorAll('.program-card');
+    
+    programCards.forEach(card => {
+        // Click handler
+        card.addEventListener('click', () => {
+            const programNumber = parseInt(card.dataset.program);
+            navigateToProgram(programNumber);
+        });
+        
+        // Keyboard accessibility
+        card.setAttribute('tabindex', '0');
+        card.setAttribute('role', 'button');
+        card.setAttribute('aria-label', `Programa ${card.dataset.program}: ${card.querySelector('.program-title').textContent}`);
+        
+        // Enter/Space key handler
+        card.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                const programNumber = parseInt(card.dataset.program);
+                navigateToProgram(programNumber);
+            }
+        });
+        
+        // Add ripple effect on click
+        card.addEventListener('click', (e) => {
+            createRipple(e, card);
+        });
+    });
 }
 
-function drawPath() {
-  ctx.setLineDash([8, 6]);
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = "#000";
-
-  path.forEach(p => {
-    ctx.beginPath();
-    ctx.moveTo(crisp(p.x1), crisp(p.y1));
-    ctx.lineTo(crisp(p.x2), crisp(p.y2));
-    ctx.stroke();
-  });
-
-  ctx.setLineDash([]);
-}
-
-function draw() {
-  ctx.clearRect(0, 0, SCENE_WIDTH, SCENE_HEIGHT);
-  drawPath();
-}
-
-/* =====================
-   ACTUALIZAR ROBOT
-===================== */
-function updateRobot() {
-  robotImg.style.left = robot.x - robotImg.width / 2 + "px";
-  robotImg.style.top = robot.y - robotImg.height / 2 + "px";
-  robotImg.style.transform = `rotate(${visualRotation}deg)`;
-}
-
-/* =====================
-   MOVIMIENTO
-===================== */
-function canMove(nx, ny) {
-  const margin = 40;
-  return (
-    nx > margin &&
-    nx < SCENE_WIDTH - margin &&
-    ny > margin &&
-    ny < SCENE_HEIGHT - margin
-  );
-}
-
-function forward() {
-  const px = robot.x;
-  const py = robot.y;
-
-  let nx = robot.x;
-  let ny = robot.y;
-
-  if (robot.dir === 0) ny -= STEP;
-  if (robot.dir === 1) nx += STEP;
-  if (robot.dir === 2) ny += STEP;
-  if (robot.dir === 3) nx -= STEP;
-
-  if (!canMove(nx, ny)) return;
-
-  robot.x = nx;
-  robot.y = ny;
-
-  if (!pathLocked) {
-    path.push({ x1: px, y1: py, x2: nx, y2: ny });
-  }
-}
-
-function backward() {
-  const px = robot.x;
-  const py = robot.y;
-
-  let nx = robot.x;
-  let ny = robot.y;
-
-  if (robot.dir === 0) ny += STEP;
-  if (robot.dir === 1) nx -= STEP;
-  if (robot.dir === 2) ny -= STEP;
-  if (robot.dir === 3) nx += STEP;
-
-  if (!canMove(nx, ny)) return;
-
-  robot.x = nx;
-  robot.y = ny;
-
-  if (!pathLocked) {
-    path.push({ x1: px, y1: py, x2: nx, y2: ny });
-  }
-}
-
-function left() {
-  robot.dir = (robot.dir + 3) % 4;
-  visualRotation -= 90;
-}
-
-function right() {
-  robot.dir = (robot.dir + 1) % 4;
-  visualRotation += 90;
-}
-
-/* =====================
-   EJECUCIÓN
-===================== */
-function execute() {
-  if (index >= sequence.length) {
-    pathLocked = true;
-    index = 0;
-
-    clearInterval(interval);
-    interval = null;
-
+// Navigate to selected program
+function navigateToProgram(programNumber) {
+    const card = document.querySelector(`[data-program="${programNumber}"]`);
+    
+    // Add loading state
+    card.classList.add('loading');
+    
+    // Get the URL for the program
+    const programURL = programURLs[programNumber];
+    
+    if (!programURL) {
+        console.error(`No URL configured for program ${programNumber}`);
+        card.classList.remove('loading');
+        showError(`Programa ${programNumber} no está disponible aún`);
+        return;
+    }
+    
+    // Add slight delay for visual feedback
     setTimeout(() => {
-      resetRobotInstant();
-      interval = setInterval(execute, 500);
-    }, RESTART_DELAY);
-
-    return;
-  }
-
-  const cmd = sequence[index];
-
-  if (cmd === "F") forward();
-  if (cmd === "B") backward();
-  if (cmd === "L") left();
-  if (cmd === "R") right();
-
-  index++;
-  draw();
-  updateRobot();
+        // Navigate to the program
+        window.location.href = programURL;
+    }, 300);
 }
 
-/* =====================
-   RESET INSTANTÁNEO
-===================== */
-function resetRobotInstant() {
-  robotImg.style.transition = "none";
-
-  robot.x = startX;
-  robot.y = startY;
-  robot.dir = 0;
-  visualRotation = 0;
-
-  updateRobot();
-  robotImg.offsetHeight;
-
-  robotImg.style.transition =
-    "transform 0.35s ease-in-out, left 0.45s linear, top 0.45s linear";
+// Create ripple effect on click
+function createRipple(event, element) {
+    const ripple = document.createElement('div');
+    const rect = element.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = event.clientX - rect.left - size / 2;
+    const y = event.clientY - rect.top - size / 2;
+    
+    ripple.style.cssText = `
+        position: absolute;
+        width: ${size}px;
+        height: ${size}px;
+        border-radius: 50%;
+        background: rgba(79, 195, 247, 0.3);
+        top: ${y}px;
+        left: ${x}px;
+        pointer-events: none;
+        transform: scale(0);
+        animation: ripple-animation 0.6s ease-out;
+        z-index: 0;
+    `;
+    
+    element.style.position = 'relative';
+    element.style.overflow = 'hidden';
+    element.appendChild(ripple);
+    
+    ripple.addEventListener('animationend', () => {
+        ripple.remove();
+    });
 }
 
-/* =====================
-   CONTROLES
-===================== */
-playBtn.onclick = () => {
-  if (interval || sequence.length === 0) return;
-  interval = setInterval(execute, 500);
+// Add ripple animation to CSS
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes ripple-animation {
+        to {
+            transform: scale(2);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(style);
+
+// Logo fallback if image doesn't load
+function initializeLogoFallback() {
+    const logoImage = document.getElementById('logoImage');
+    
+    if (!logoImage) return;
+    
+    logoImage.addEventListener('error', () => {
+        logoImage.classList.add('error');
+        
+        // Create fallback text
+        const fallback = document.createElement('h1');
+        fallback.className = 'logo-fallback';
+        fallback.textContent = 'CyberPi Suite';
+        
+        logoImage.parentElement.appendChild(fallback);
+    });
+}
+
+// Keyboard navigation between cards
+function addKeyboardNavigation() {
+    document.addEventListener('keydown', (e) => {
+        const programCards = Array.from(document.querySelectorAll('.program-card'));
+        const activeElement = document.activeElement;
+        const currentIndex = programCards.indexOf(activeElement);
+        
+        if (currentIndex === -1) return;
+        
+        let newIndex = currentIndex;
+        
+        switch (e.key) {
+            case 'ArrowRight':
+            case 'ArrowDown':
+                e.preventDefault();
+                newIndex = (currentIndex + 1) % programCards.length;
+                break;
+            case 'ArrowLeft':
+            case 'ArrowUp':
+                e.preventDefault();
+                newIndex = (currentIndex - 1 + programCards.length) % programCards.length;
+                break;
+            default:
+                return;
+        }
+        
+        programCards[newIndex].focus();
+    });
+}
+
+// Add staggered animation delays
+function addAnimationDelays() {
+    const cards = document.querySelectorAll('.program-card');
+    cards.forEach((card, index) => {
+        card.style.animationDelay = `${0.1 * (index + 1)}s`;
+    });
+}
+
+// Show error message
+function showError(message) {
+    const errorDiv = document.createElement('div');
+    errorDiv.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #ff5252;
+        color: white;
+        padding: 16px 24px;
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+        font-weight: 500;
+        z-index: 1000;
+        animation: slideInRight 0.3s ease-out;
+    `;
+    errorDiv.textContent = message;
+    
+    document.body.appendChild(errorDiv);
+    
+    setTimeout(() => {
+        errorDiv.style.animation = 'slideOutRight 0.3s ease-out';
+        setTimeout(() => errorDiv.remove(), 300);
+    }, 3000);
+}
+
+// Add error animations
+const errorStyle = document.createElement('style');
+errorStyle.textContent = `
+    @keyframes slideInRight {
+        from {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOutRight {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(400px);
+            opacity: 0;
+        }
+    }
+`;
+document.head.appendChild(errorStyle);
+
+// Add hover sound effect (optional - can be commented out)
+function addHoverSounds() {
+    const cards = document.querySelectorAll('.program-card');
+    
+    cards.forEach(card => {
+        card.addEventListener('mouseenter', () => {
+            // Uncomment to add hover sound
+            // const audio = new Audio('hover-sound.mp3');
+            // audio.volume = 0.2;
+            // audio.play().catch(e => console.log('Audio play failed:', e));
+        });
+    });
+}
+
+// Log initialization
+console.log('CyberPi Suite - Landing Page Initialized');
+console.log('Programs configured:', programURLs);
+console.log('Keyboard navigation: Arrow keys to navigate, Enter/Space to select');
+
+// Export for debugging
+window.cyberpiSuite = {
+    navigateToProgram,
+    programURLs
 };
-
-stopBtn.onclick = () => {
-  clearInterval(interval);
-  interval = null;
-};
-
-resetBtn.onclick = () => {
-  clearInterval(interval);
-  interval = null;
-
-  sequence = [];
-  sequenceBox.innerHTML = "";
-  path = [];
-  pathLocked = false;
-  index = 0;
-
-  recenterScene();
-};
-
-toggleSeqBtn.onclick = () => {
-  sequenceBox.style.display =
-    sequenceBox.style.display === "none" ? "block" : "none";
-};
-
-/* =====================
-   TECLADO
-===================== */
-document.addEventListener("keydown", e => {
-  if (e.key === "ArrowUp") addAction("F", "⬆");
-  if (e.key === "ArrowDown") addAction("B", "⬇");
-  if (e.key === "ArrowLeft") addAction("L", "⬅");
-  if (e.key === "ArrowRight") addAction("R", "➡");
-  if (e.key === "Backspace") removeLast();
-  if (e.key === "h") toggleSeqBtn.click();
-});
-
-function addAction(code, symbol) {
-  sequence.push(code);
-  sequenceBox.innerHTML += symbol + " ";
-}
-
-function removeLast() {
-  sequence.pop();
-  sequenceBox.innerHTML = sequenceBox.innerHTML.slice(0, -3);
-}
-
-/* =====================
-   RECENTER TOTAL (CLAVE)
-===================== */
-function recenterScene() {
-  SCENE_WIDTH = scene.clientWidth;
-  SCENE_HEIGHT = scene.clientHeight;
-
-  canvas.width = SCENE_WIDTH;
-  canvas.height = SCENE_HEIGHT;
-
-  startX = SCENE_WIDTH / 2;
-  startY = SCENE_HEIGHT / 2;
-
-  robot.x = startX;
-  robot.y = startY;
-  robot.dir = 0;
-  visualRotation = 0;
-
-  draw();
-  updateRobot();
-}
-
-/* =====================
-   INIT
-===================== */
-recenterScene();
-
-/* =====================
-   RESPONSIVE REAL
-===================== */
-window.addEventListener("resize", () => {
-  robotImg.style.transition = "none";
-  recenterScene();
-  robotImg.offsetHeight;
-  robotImg.style.transition =
-    "transform 0.35s ease-in-out, left 0.45s linear, top 0.45s linear";
-});

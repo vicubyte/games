@@ -1,11 +1,11 @@
 // Application State
 const state = {
     currentLedColors: {
-        1: '#2c2c2c',
-        2: '#2c2c2c',
-        3: '#2c2c2c',
-        4: '#2c2c2c',
-        5: '#2c2c2c'
+        1: '#9E9E9E',
+        2: '#9E9E9E',
+        3: '#9E9E9E',
+        4: '#9E9E9E',
+        5: '#9E9E9E'
     },
     selectedColor: '#F44336',
     customColor: '#F44336',
@@ -21,13 +21,14 @@ const state = {
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
     initializeColorPalette();
+    initializeColorPaletteMobile();
     initializeTools();
     initializeTimeline();
     initializeLEDs();
     initializeHomeButton();
     initializeModal();
+    initializeCustomColorPicker();
     
-    // Add first empty state
     addNewState();
     renderStates();
 });
@@ -40,93 +41,199 @@ function initializeHomeButton() {
     });
 }
 
-// Color Palette Functions
-function initializeColorPalette() {
-    const colorPresets = document.querySelectorAll('.color-preset:not(.custom-color-btn)');
-    const customColorBtn = document.getElementById('customColorBtn');
-    const editCustomColor = document.getElementById('editCustomColor');
+// ⭐ Color Picker - Toggle + Posicionado responsivo ⭐
+function initializeCustomColorPicker() {
     const colorPicker = document.getElementById('colorPicker');
+    const editCustomColor = document.getElementById('editCustomColor');
+    const customColorBtn = document.getElementById('customColorBtn');
+    let isPickerOpen = false;
     
-    colorPresets.forEach(preset => {
-        preset.addEventListener('click', () => {
-            selectColor(preset.dataset.color, preset);
+    if (editCustomColor) {
+        editCustomColor.addEventListener('click', (e) => {
+            e.stopPropagation();
+            
+            if (!isPickerOpen) {
+                // ✅ Posicionar el input para que el selector aparezca al lado izquierdo
+                const rect = customColorBtn.getBoundingClientRect();
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
+                
+                // Calcular posición óptima (al lado izquierdo sin cubrir colores)
+                let left = rect.left - 350; // 350px a la izquierda (ancho del selector nativo)
+                let top = rect.top;
+                
+                // Ajustar si se sale por la izquierda
+                if (left < 10) {
+                    left = 10; // Pegado al borde izquierdo con margen
+                }
+                
+                // Ajustar si se sale por la derecha
+                if (left + 350 > viewportWidth - 10) {
+                    left = Math.max(10, viewportWidth - 360);
+                }
+                
+                // Ajustar verticalmente si se sale
+                if (top + 400 > viewportHeight) {
+                    top = Math.max(10, viewportHeight - 410);
+                }
+                
+                if (top < 10) {
+                    top = 10;
+                }
+                
+                // Aplicar posición al input
+                colorPicker.style.left = left + 'px';
+                colorPicker.style.top = top + 'px';
+                
+                // Abrir el selector
+                setTimeout(() => {
+                    colorPicker.click();
+                }, 10);
+                isPickerOpen = true;
+            } else {
+                // ✅ Cerrar: mover el input fuera de vista
+                colorPicker.style.left = '-9999px';
+                colorPicker.style.top = '-9999px';
+                isPickerOpen = false;
+            }
         });
-    });
+    }
     
-    // Custom color button click (select the custom color)
-    customColorBtn.addEventListener('click', (e) => {
-        if (!e.target.closest('.edit-custom-color')) {
-            selectColor(state.customColor, customColorBtn);
-        }
-    });
-    
-    // Edit custom color button
-    editCustomColor.addEventListener('click', (e) => {
-        e.stopPropagation();
-        colorPicker.click();
+    // Detectar cuando se cierra el selector
+    colorPicker.addEventListener('blur', () => {
+        setTimeout(() => {
+            colorPicker.style.left = '-9999px';
+            colorPicker.style.top = '-9999px';
+            isPickerOpen = false;
+        }, 100);
     });
     
     colorPicker.addEventListener('change', (e) => {
         const color = e.target.value;
         state.customColor = color;
         updateCustomColorDisplay();
-        selectColor(color, customColorBtn);
+        selectColor(color);
+        // Mover fuera de vista
+        colorPicker.style.left = '-9999px';
+        colorPicker.style.top = '-9999px';
+        isPickerOpen = false;
     });
     
-    // Initialize custom color display
+    // Cancelar también cierra
+    colorPicker.addEventListener('cancel', () => {
+        colorPicker.style.left = '-9999px';
+        colorPicker.style.top = '-9999px';
+        isPickerOpen = false;
+    });
+    
+    colorPicker.addEventListener('input', (e) => {
+        const color = e.target.value;
+        state.customColor = color;
+        updateCustomColorDisplay();
+    });
+}
+
+// Color Palette Functions
+function initializeColorPalette() {
+    const colorPresets = document.querySelectorAll('.sidebar-right .color-preset:not(.custom-color-btn)');
+    const customColorBtn = document.getElementById('customColorBtn');
+    const colorPicker = document.getElementById('colorPicker');
+    
+    colorPresets.forEach(preset => {
+        preset.addEventListener('click', () => {
+            selectColor(preset.dataset.color);
+        });
+    });
+    
+    // Custom color button - seleccionar el color actual
+    if (customColorBtn) {
+        customColorBtn.addEventListener('click', (e) => {
+            if (!e.target.closest('.edit-custom-color')) {
+                selectColor(state.customColor);
+            }
+        });
+    }
+    
     updateCustomColorDisplay();
 }
 
 function updateCustomColorDisplay() {
-    const customColorBtn = document.getElementById('customColorBtn');
-    const gradient = customColorBtn.querySelector('.custom-color-gradient');
-    gradient.style.background = state.customColor;
+    const displays = document.querySelectorAll('.custom-color-display, .custom-color-display-mobile');
+    displays.forEach(display => {
+        display.style.background = state.customColor;
+    });
 }
 
-function selectColor(color, element = null) {
+function selectColor(color) {
     state.selectedColor = color;
     
-    // Remove selected class from all
-    document.querySelectorAll('.color-preset').forEach(el => {
+    // Remove selected from all (desktop and mobile)
+    document.querySelectorAll('.color-preset, .color-preset-mobile').forEach(el => {
         el.classList.remove('selected');
     });
     
-    // Add selected class
-    if (element) {
-        element.classList.add('selected');
+    // Add selected to matching color
+    document.querySelectorAll(`.color-preset[data-color="${color}"], .color-preset-mobile[data-color="${color}"]`).forEach(el => {
+        el.classList.add('selected');
+    });
+    
+    // If custom color, select custom button
+    if (color === state.customColor) {
+        document.querySelectorAll('.custom-color-btn, .custom-color-btn-mobile').forEach(el => {
+            el.classList.add('selected');
+        });
     }
 }
 
-// LED Functions with Drag-to-Paint
+// Color Palette Mobile
+function initializeColorPaletteMobile() {
+    const colorPresetsMobile = document.querySelectorAll('.color-palette-mobile .color-preset-mobile:not(.custom-color-btn-mobile)');
+    const customColorBtnMobile = document.getElementById('customColorBtnMobile');
+    const colorPicker = document.getElementById('colorPicker');
+    
+    colorPresetsMobile.forEach(preset => {
+        preset.addEventListener('click', () => {
+            selectColor(preset.dataset.color);
+        });
+    });
+    
+    if (customColorBtnMobile) {
+        customColorBtnMobile.addEventListener('click', () => {
+            colorPicker.click();
+        });
+    }
+}
+
+// LED Functions
 function initializeLEDs() {
     const leds = document.querySelectorAll('.led-light');
     
     leds.forEach(led => {
-        // Mouse events
         led.addEventListener('mousedown', (e) => {
             if (state.editMode) {
                 state.isPainting = true;
                 state.paintedLeds.clear();
                 const ledNumber = parseInt(led.dataset.led);
-                paintLed(ledNumber);
+                toggleLed(ledNumber);
             }
         });
         
         led.addEventListener('mouseenter', () => {
             if (state.isPainting && state.editMode) {
                 const ledNumber = parseInt(led.dataset.led);
-                paintLed(ledNumber);
+                if (!state.paintedLeds.has(ledNumber)) {
+                    paintLed(ledNumber);
+                }
             }
         });
         
-        // Touch events for mobile
         led.addEventListener('touchstart', (e) => {
             if (state.editMode) {
                 e.preventDefault();
                 state.isPainting = true;
                 state.paintedLeds.clear();
                 const ledNumber = parseInt(led.dataset.led);
-                paintLed(ledNumber);
+                toggleLed(ledNumber);
             }
         });
         
@@ -137,13 +244,14 @@ function initializeLEDs() {
                 const element = document.elementFromPoint(touch.clientX, touch.clientY);
                 if (element && element.classList.contains('led-light')) {
                     const ledNumber = parseInt(element.dataset.led);
-                    paintLed(ledNumber);
+                    if (!state.paintedLeds.has(ledNumber)) {
+                        paintLed(ledNumber);
+                    }
                 }
             }
         });
     });
     
-    // Stop painting on mouse up (anywhere)
     document.addEventListener('mouseup', () => {
         if (state.isPainting) {
             state.isPainting = false;
@@ -152,7 +260,6 @@ function initializeLEDs() {
         }
     });
     
-    // Stop painting on touch end
     document.addEventListener('touchend', () => {
         if (state.isPainting) {
             state.isPainting = false;
@@ -160,6 +267,20 @@ function initializeLEDs() {
             updateCurrentState();
         }
     });
+}
+
+function toggleLed(ledNumber) {
+    const currentColor = state.currentLedColors[ledNumber];
+    
+    if (currentColor === '#9E9E9E' || currentColor === '#2c2c2c') {
+        applyColorToLed(ledNumber, state.selectedColor);
+    } else if (currentColor === state.selectedColor) {
+        applyColorToLed(ledNumber, '#9E9E9E');
+    } else {
+        applyColorToLed(ledNumber, state.selectedColor);
+    }
+    
+    state.paintedLeds.add(ledNumber);
 }
 
 function paintLed(ledNumber) {
@@ -181,11 +302,15 @@ function updateLEDDisplay() {
             const color = state.currentLedColors[i];
             led.style.background = color;
             
-            if (color !== '#2c2c2c' && color !== '#000000') {
-                led.style.boxShadow = `0 0 15px ${color}, 0 0 30px ${color}, inset 0 2px 4px rgba(0, 0, 0, 0.3)`;
+            if (color !== '#9E9E9E' && color !== '#2c2c2c' && color !== '#000000') {
+                // LED encendido - fondo del color + borde del mismo color
+                led.style.borderColor = color; // ✅ BORDE DEL MISMO COLOR
+                led.style.boxShadow = `0 0 15px ${color}, 0 0 25px ${color}, inset 0 1px 3px rgba(0, 0, 0, 0.4)`;
                 led.classList.add('active');
             } else {
-                led.style.boxShadow = 'inset 0 2px 4px rgba(0, 0, 0, 0.3)';
+                // LED apagado - gris
+                led.style.borderColor = '#757575';
+                led.style.boxShadow = 'inset 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(255, 255, 255, 0.1)';
                 led.classList.remove('active');
             }
         }
@@ -196,46 +321,41 @@ function updateLEDDisplay() {
 function initializeTools() {
     const editBtn = document.getElementById('editBtn');
     const clearBtn = document.getElementById('clearBtn');
-    const copyBtn = document.getElementById('copyBtn');
+    const editBtnMobile = document.getElementById('editBtnMobile');
+    const clearBtnMobile = document.getElementById('clearBtnMobile');
     
-    editBtn.addEventListener('click', toggleEditMode);
-    clearBtn.addEventListener('click', clearAllLEDs);
-    copyBtn.addEventListener('click', duplicateCurrentState);
+    if (editBtn) editBtn.addEventListener('click', toggleEditMode);
+    if (clearBtn) clearBtn.addEventListener('click', clearAllLEDs);
+    if (editBtnMobile) editBtnMobile.addEventListener('click', toggleEditMode);
+    if (clearBtnMobile) clearBtnMobile.addEventListener('click', clearAllLEDs);
 }
 
 function toggleEditMode() {
     state.editMode = !state.editMode;
-    const editBtn = document.getElementById('editBtn');
     
-    if (state.editMode) {
-        editBtn.style.background = 'var(--primary-blue-light)';
-        editBtn.style.borderColor = 'var(--primary-blue)';
-    } else {
-        editBtn.style.background = 'var(--bg-white)';
-        editBtn.style.borderColor = 'var(--border-color)';
-    }
+    const editBtns = [
+        document.getElementById('editBtn'),
+        document.getElementById('editBtnMobile')
+    ];
+    
+    editBtns.forEach(btn => {
+        if (!btn) return;
+        
+        if (state.editMode) {
+            btn.style.background = 'var(--primary-blue-light)';
+            btn.style.borderColor = 'var(--primary-blue)';
+        } else {
+            btn.style.background = '';
+            btn.style.borderColor = '';
+        }
+    });
 }
 
 function clearAllLEDs() {
     for (let i = 1; i <= 5; i++) {
-        applyColorToLed(i, '#2c2c2c');
+        applyColorToLed(i, '#9E9E9E');
     }
     updateCurrentState();
-}
-
-function duplicateCurrentState() {
-    const currentState = state.states[state.currentStateIndex];
-    if (!currentState) return;
-    
-    const newState = {
-        id: Date.now(),
-        ledColors: { ...currentState.ledColors },
-        duration: currentState.duration || 1.0
-    };
-    
-    state.states.splice(state.currentStateIndex + 1, 0, newState);
-    state.currentStateIndex++;
-    renderStates();
 }
 
 // Timeline Functions
@@ -283,12 +403,11 @@ function renderStates() {
         timeline.appendChild(thumbnail);
     });
     
-    // Add "new state" button
     const addBtn = document.createElement('button');
     addBtn.className = 'add-state-btn';
     addBtn.innerHTML = `
         <i class="fa-solid fa-plus"></i>
-        <span>Nuevo</span>
+        <span>New</span>
     `;
     addBtn.addEventListener('click', () => {
         addNewState();
@@ -297,7 +416,6 @@ function renderStates() {
     });
     timeline.appendChild(addBtn);
     
-    // Scroll to current state
     scrollToState(state.currentStateIndex);
 }
 
@@ -316,7 +434,7 @@ function createStateThumbnail(stateData, index) {
         led.className = 'state-thumbnail-led';
         const color = stateData.ledColors[i];
         led.style.background = color;
-        if (color !== '#2c2c2c' && color !== '#000000') {
+        if (color !== '#9E9E9E' && color !== '#2c2c2c' && color !== '#000000') {
             led.style.boxShadow = `0 0 4px ${color}`;
         }
         ledsContainer.appendChild(led);
@@ -327,7 +445,7 @@ function createStateThumbnail(stateData, index) {
     
     const label = document.createElement('div');
     label.className = 'state-thumbnail-label';
-    label.textContent = `Estado ${index + 1}`;
+    label.textContent = `State ${index + 1}`;
     
     const timeContainer = document.createElement('div');
     timeContainer.className = 'state-thumbnail-time';
@@ -337,9 +455,7 @@ function createStateThumbnail(stateData, index) {
     timeInput.min = '0.1';
     timeInput.step = '0.1';
     timeInput.value = stateData.duration || 1.0;
-    timeInput.addEventListener('click', (e) => {
-        e.stopPropagation();
-    });
+    timeInput.addEventListener('click', (e) => e.stopPropagation());
     timeInput.addEventListener('change', (e) => {
         e.stopPropagation();
         const newDuration = parseFloat(e.target.value);
@@ -398,11 +514,11 @@ function updateCurrentState() {
 
 function deleteState(index) {
     if (state.states.length === 1) {
-        alert('Debe haber al menos un estado');
+        alert('There must be at least one state');
         return;
     }
     
-    if (confirm('¿Eliminar este estado?')) {
+    if (confirm('Delete this state?')) {
         state.states.splice(index, 1);
         
         if (state.currentStateIndex >= state.states.length) {
@@ -451,7 +567,6 @@ function initializeModal() {
         }
     });
     
-    // Close modal on background click
     modal.addEventListener('click', (e) => {
         if (e.target === modal) {
             modal.classList.remove('active');
@@ -477,7 +592,7 @@ function togglePlayback() {
 
 function startPlayback() {
     if (state.states.length === 0) {
-        alert('No hay estados para reproducir');
+        alert('No states to play');
         return;
     }
     
@@ -519,13 +634,13 @@ async function playSequence() {
     renderStates();
     
     const currentState = state.states[state.currentStateIndex];
-    const duration = (currentState.duration || 1.0) * 1000; // Convert to milliseconds
+    const duration = (currentState.duration || 1.0) * 1000;
     
     state.playInterval = setTimeout(() => {
         state.currentStateIndex++;
         
         if (state.currentStateIndex >= state.states.length) {
-            state.currentStateIndex = 0; // Loop
+            state.currentStateIndex = 0;
         }
         
         playSequence();
@@ -534,13 +649,11 @@ async function playSequence() {
 
 // Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
-    // Space to play/stop
     if (e.code === 'Space' && !e.target.matches('input, textarea')) {
         e.preventDefault();
         togglePlayback();
     }
     
-    // Arrow keys to navigate states
     if (e.key === 'ArrowLeft' && !e.target.matches('input, textarea')) {
         e.preventDefault();
         if (state.currentStateIndex > 0) {
@@ -559,30 +672,21 @@ document.addEventListener('keydown', (e) => {
         }
     }
     
-    // E to toggle edit mode
     if (e.key === 'e' && !e.target.matches('input, textarea')) {
         e.preventDefault();
         toggleEditMode();
     }
     
-    // N to add new state
     if (e.key === 'n' && !e.target.matches('input, textarea')) {
         e.preventDefault();
         addNewState();
         renderStates();
     }
     
-    // Delete to remove current state
     if (e.key === 'Delete' && !e.target.matches('input, textarea')) {
         e.preventDefault();
         deleteState(state.currentStateIndex);
     }
 });
 
-console.log('CyberPi LED Sequencer - mBlock Style');
-console.log('Atajos de teclado:');
-console.log('- Espacio: Play/Pause');
-console.log('- Flechas: Navegar estados');
-console.log('- E: Activar modo edición');
-console.log('- N: Nuevo estado');
-console.log('- Delete: Eliminar estado actual');
+console.log('✅ CyberPi LED Sequencer - Version with improved LEDs and color picker');

@@ -16,7 +16,13 @@ const scene = document.querySelector(".scene");
 let SCENE_WIDTH;
 let SCENE_HEIGHT;
 
-const STEP = 70;
+// STEP proporcional al tamaño del robot
+function getSTEP() {
+  // El STEP debe ser proporcional al ancho del robot
+  const robotWidth = robotImg.width || 150;
+  return Math.max(robotWidth * 0.47, 40); // Aproximadamente 0.47 veces el ancho del robot, mínimo 40px
+}
+
 const RESTART_DELAY = 500;
 
 /* =====================
@@ -86,7 +92,7 @@ function updateRobot() {
    MOVIMIENTO
 ===================== */
 function canMove(nx, ny) {
-  const margin = 70/2;
+  const margin = robotImg.width / 2 || 35;
   return (
     nx > margin &&
     nx < SCENE_WIDTH - margin &&
@@ -98,6 +104,7 @@ function canMove(nx, ny) {
 function forward() {
   const px = robot.x;
   const py = robot.y;
+  const STEP = getSTEP();
 
   let nx = robot.x;
   let ny = robot.y;
@@ -120,6 +127,7 @@ function forward() {
 function backward() {
   const px = robot.x;
   const py = robot.y;
+  const STEP = getSTEP();
 
   let nx = robot.x;
   let ny = robot.y;

@@ -61,7 +61,7 @@ canvas {
 
 #robot {
   position: absolute;
-  width: 120px;
+  width: 100px;
   transform-origin: center;
   filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
   transition: filter 0.2s ease;
@@ -276,6 +276,7 @@ canvas {
   50% { transform: translateY(-15px); }
 }
 
+/* ✅ CONTROLES IZQUIERDA - Alineados con HOME */
 .left-controls {
   position: absolute;
   left: 20px;
@@ -351,16 +352,17 @@ canvas {
   color: #F44336;
 }
 
+/* ✅ REC/SAVE - Circulares pero mismo ancho que PLAY/PAUSE/RESET */
 .record-group {
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 12px; /* ✅ Mismo gap que control-group */
 }
 
 .circle-btn {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
+  width: 56px; /* ✅ Mismo ancho que control-btn */
+  height: 56px; /* ✅ Misma altura que control-btn */
+  border-radius: 50%; /* ✅ Círculo perfecto */
   border: 2px solid var(--border-color);
   background: var(--bg-white);
   cursor: pointer;
@@ -369,7 +371,7 @@ canvas {
   justify-content: center;
   transition: all var(--transition);
   box-shadow: var(--shadow-sm);
-  font-size: 24px;
+  font-size: 20px; /* ✅ Mismo tamaño de ícono */
 }
 
 .circle-btn:hover {
@@ -544,8 +546,7 @@ canvas {
 
 @media (max-width: 1024px) {
   .left-controls { padding-top: 30px; }
-  .control-btn { width: 50px; height: 50px; font-size: 18px; }
-  .circle-btn { width: 64px; height: 64px; font-size: 22px; }
+  .control-btn, .circle-btn { width: 50px; height: 50px; font-size: 18px; }
   .dpad-btn { width: 50px; height: 50px; font-size: 18px; }
   .dpad-center { width: 50px; height: 50px; }
 }
@@ -556,8 +557,7 @@ canvas {
   .btn-track { right: 12px; }
   .btn-home i, .btn-track i { font-size: 16px; }
   .left-controls { left: 15px; padding-top: 20px; }
-  .control-btn { width: 48px; height: 48px; font-size: 16px; }
-  .circle-btn { width: 60px; height: 60px; font-size: 20px; }
+  .control-btn, .circle-btn { width: 48px; height: 48px; font-size: 16px; }
   .dpad-btn { width: 48px; height: 48px; font-size: 18px; }
   .dpad-center { width: 48px; height: 48px; }
   .dpad { right: 20px; bottom: 70px; }
@@ -565,10 +565,8 @@ canvas {
 
 @media (max-width: 480px) {
   .left-controls { gap: 20px; left: 10px; }
-  .control-group { gap: 10px; }
-  .record-group { gap: 12px; }
-  .control-btn { width: 44px; height: 44px; font-size: 14px; }
-  .circle-btn { width: 56px; height: 56px; font-size: 18px; }
+  .control-group, .record-group { gap: 10px; }
+  .control-btn, .circle-btn { width: 44px; height: 44px; font-size: 14px; }
   .dpad-btn { width: 44px; height: 44px; font-size: 16px; }
   .dpad-center { width: 44px; height: 44px; }
   .dpad { right: 15px; bottom: 60px; }
@@ -577,10 +575,8 @@ canvas {
 
 @media (orientation: landscape) and (max-height: 600px) {
   .left-controls { padding-top: 10px; gap: 15px; transform: translateY(-45%); }
-  .control-group { gap: 8px; }
-  .record-group { gap: 10px; }
-  .control-btn { width: 42px; height: 42px; }
-  .circle-btn { width: 52px; height: 52px; }
+  .control-group, .record-group { gap: 8px; }
+  .control-btn, .circle-btn { width: 42px; height: 42px; }
   .dpad { bottom: 40px; }
   .dpad-btn { width: 42px; height: 42px; }
   .dpad-center { width: 42px; height: 42px; }

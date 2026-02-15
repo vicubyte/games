@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,86 +14,114 @@
 <body>
     <div class="app-container">
         <!-- Home Button -->
-        <button class="btn-home" id="homeButton" title="Inicio">
+        <button class="btn-home" id="homeButton" title="Home">
             <i class="fa-solid fa-house"></i>
         </button>
 
+        <!-- Top Tools (visible on mobile) -->
+        <div class="top-tools">
+            <button class="tool-btn" id="editBtnMobile" title="Edit">
+                <i class="fa-solid fa-pen-to-square"></i>
+            </button>
+            <button class="tool-btn" id="clearBtnMobile" title="Clear">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        </div>
+
         <!-- Main Content -->
         <div class="main-content">
-            <!-- Left Sidebar - Color Palette -->
+            <!-- LEFT SIDEBAR - TOOLS -->
             <div class="sidebar-left">
-                <div class="color-palette">
-                    <button class="color-preset" data-color="#9E9E9E" style="background: #9E9E9E;" title="Gris"></button>
-                    <button class="color-preset selected" data-color="#F44336" style="background: #F44336;" title="Rojo"></button>
-                    <button class="color-preset" data-color="#FF9800" style="background: #FF9800;" title="Naranja"></button>
-                    <button class="color-preset" data-color="#FFEB3B" style="background: #FFEB3B;" title="Amarillo"></button>
-                    <button class="color-preset" data-color="#8BC34A" style="background: #8BC34A;" title="Verde Lima"></button>
-                    <button class="color-preset" data-color="#4DD0E1" style="background: #4DD0E1;" title="Cian"></button>
-                    <button class="color-preset" data-color="#2196F3" style="background: #2196F3;" title="Azul"></button>
-                    <button class="color-preset" data-color="#9C27B0" style="background: #9C27B0;" title="Púrpura"></button>
-                    <button class="color-preset custom-color-btn" id="customColorBtn" title="Color personalizado">
-                        <div class="custom-color-gradient"></div>
-                        <div class="edit-custom-color" id="editCustomColor" title="Editar color personalizado">
-                            <i class="fa-solid fa-pen"></i>
-                        </div>
-                    </button>
-                </div>
-                <input type="color" id="colorPicker" value="#F44336" style="display: none;">
+                <button class="tool-btn" id="editBtn" title="Edit">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+                <button class="tool-btn" id="clearBtn" title="Clear">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
             </div>
 
             <!-- Center - CyberPi Display -->
             <div class="center-display">
-                <div class="cyberpi-display">
-                    <div class="cyberpi-board">
-                        <img src="cyberpi.png" alt="CyberPi Board" class="cyberpi-image" id="cyberpiImage">
-                        <div class="led-overlay">
-                            <div class="led-light" data-led="1"></div>
-                            <div class="led-light" data-led="2"></div>
-                            <div class="led-light" data-led="3"></div>
-                            <div class="led-light" data-led="4"></div>
-                            <div class="led-light" data-led="5"></div>
-                        </div>
+                <div class="cyberpi-container">
+                    <img src="cyberpi.png" alt="CyberPi Board" class="cyberpi-image">
+                    <div class="led-overlay">
+                        <!-- ⭐ LEDs with numbers ⭐ -->
+                        <div class="led-light" data-led="1"></div>
+                        <div class="led-light" data-led="2"></div>
+                        <div class="led-light" data-led="3"></div>
+                        <div class="led-light" data-led="4"></div>
+                        <div class="led-light" data-led="5"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Right Sidebar - Tools -->
+            <!-- ⭐ RIGHT SIDEBAR - COLOR PALETTE IN 2 COLUMNS ⭐ -->
             <div class="sidebar-right">
-                <button class="tool-btn" id="editBtn" title="Editar">
-                    <i class="fa-solid fa-pen-to-square"></i>
-                </button>
-                <button class="tool-btn" id="clearBtn" title="Limpiar">
-                    <i class="fa-solid fa-trash"></i>
-                </button>
-                <button class="tool-btn" id="copyBtn" title="Copiar estado">
-                    <i class="fa-solid fa-copy"></i>
-                </button>
+                <div class="color-palette">
+                    <button class="color-preset" data-color="#9E9E9E" style="background: #9E9E9E;" title="Off"></button>
+                    <button class="color-preset selected" data-color="#F44336" style="background: #F44336;" title="Red"></button>
+                    <button class="color-preset" data-color="#FF9800" style="background: #FF9800;" title="Orange"></button>
+                    <button class="color-preset" data-color="#FFEB3B" style="background: #FFEB3B;" title="Yellow"></button>
+                    <button class="color-preset" data-color="#8BC34A" style="background: #8BC34A;" title="Lime"></button>
+                    <button class="color-preset" data-color="#4DD0E1" style="background: #4DD0E1;" title="Cyan"></button>
+                    <button class="color-preset" data-color="#2196F3" style="background: #2196F3;" title="Blue"></button>
+                    <button class="color-preset" data-color="#9C27B0" style="background: #9C27B0;" title="Purple"></button>
+                    
+                    <!-- ⭐ Custom color centered at the end ⭐ -->
+                    <button class="color-preset custom-color-btn" id="customColorBtn" title="Custom color">
+                        <div class="custom-color-display"></div>
+                        <i class="fa-solid fa-palette custom-color-icon"></i>
+                        <div class="edit-custom-color" id="editCustomColor" title="Edit color">
+                            <i class="fa-solid fa-pen"></i>
+                        </div>
+                    </button>
+                </div>
+                <input type="color" id="colorPicker" value="#F44336">
             </div>
         </div>
 
-        <!-- Bottom Timeline -->
-        <div class="timeline-section">
-            <div class="timeline-controls">
-                <button class="timeline-nav" id="prevState">
-                    <i class="fa-solid fa-chevron-left"></i>
+        <!-- Bottom Section -->
+        <div class="bottom-section">
+            <!-- Color Palette Mobile -->
+            <div class="color-palette-mobile">
+                <button class="color-preset-mobile" data-color="#9E9E9E" style="background: #9E9E9E;" title="Off"></button>
+                <button class="color-preset-mobile selected" data-color="#F44336" style="background: #F44336;" title="Red"></button>
+                <button class="color-preset-mobile" data-color="#FF9800" style="background: #FF9800;" title="Orange"></button>
+                <button class="color-preset-mobile" data-color="#FFEB3B" style="background: #FFEB3B;" title="Yellow"></button>
+                <button class="color-preset-mobile" data-color="#8BC34A" style="background: #8BC34A;" title="Lime"></button>
+                <button class="color-preset-mobile" data-color="#4DD0E1" style="background: #4DD0E1;" title="Cyan"></button>
+                <button class="color-preset-mobile" data-color="#2196F3" style="background: #2196F3;" title="Blue"></button>
+                <button class="color-preset-mobile" data-color="#9C27B0" style="background: #9C27B0;" title="Purple"></button>
+                <button class="color-preset-mobile custom-color-btn-mobile" id="customColorBtnMobile" title="Custom">
+                    <div class="custom-color-display-mobile"></div>
+                    <i class="fa-solid fa-palette custom-color-icon-mobile"></i>
                 </button>
-                
-                <div class="states-timeline" id="statesTimeline">
-                    <!-- States will be added here -->
+            </div>
+
+            <!-- Timeline -->
+            <div class="timeline-section">
+                <div class="timeline-controls">
+                    <button class="timeline-nav" id="prevState">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    
+                    <div class="states-timeline" id="statesTimeline">
+                        <!-- States will be added here -->
+                    </div>
+                    
+                    <button class="timeline-nav" id="nextState">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                    
+                    <button class="time-all-btn" id="timeAllBtn" title="Apply time to all">
+                        <i class="fa-solid fa-clock"></i>
+                    </button>
+                    
+                    <button class="play-btn" id="playBtn">
+                        <i class="fa-solid fa-play" id="playIcon"></i>
+                        <i class="fa-solid fa-pause" id="pauseIcon" style="display: none;"></i>
+                    </button>
                 </div>
-                
-                <button class="timeline-nav" id="nextState">
-                    <i class="fa-solid fa-chevron-right"></i>
-                </button>
-                
-                <button class="time-all-btn" id="timeAllBtn" title="Aplicar tiempo a todos">
-                    <i class="fa-solid fa-clock"></i>
-                </button>
-                
-                <button class="play-btn" id="playBtn">
-                    <i class="fa-solid fa-play" id="playIcon"></i>
-                    <i class="fa-solid fa-pause" id="pauseIcon" style="display: none;"></i>
-                </button>
             </div>
         </div>
     </div>
@@ -101,14 +129,14 @@
     <!-- Modal for global time -->
     <div class="modal" id="timeModal">
         <div class="modal-content">
-            <h3>Aplicar tiempo a todas las secuencias</h3>
+            <h3>Apply time to all sequences</h3>
             <div class="time-input-group">
-                <label for="globalTimeInput">Tiempo (segundos):</label>
+                <label for="globalTimeInput">Time (seconds):</label>
                 <input type="number" id="globalTimeInput" min="0.1" step="0.1" value="1.0">
             </div>
             <div class="modal-buttons">
-                <button class="modal-btn cancel" id="cancelTimeBtn">Cancelar</button>
-                <button class="modal-btn apply" id="applyTimeBtn">Aplicar</button>
+                <button class="modal-btn cancel" id="cancelTimeBtn">Cancel</button>
+                <button class="modal-btn apply" id="applyTimeBtn">Apply</button>
             </div>
         </div>
     </div>

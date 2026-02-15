@@ -34,13 +34,13 @@ const initialRobotState = {
 
 /* =====================
    MOVIMIENTO OPTIMIZADO
-   - Velocidad moderada
-   - Mejor capacidad de giro (curvas cerradas)
+   - Velocidad muy reducida para máxima precisión
+   - Giro lento para curvas muy controladas
    - Delta time para consistencia
 ===================== */
-const MAX_SPEED = 3.5;        // Velocidad máxima (px por frame a 60fps)
-const TURN_SPEED = 2.8;       // Velocidad de giro aumentada para curvas más cerradas
-const ACCELERATION = 0.15;    // Aceleración
+const MAX_SPEED = 1.5;        // Velocidad máxima muy reducida (era 2.2)
+const TURN_SPEED = 1.2;       // Velocidad de giro muy reducida (era 1.8)
+const ACCELERATION = 0.08;    // Aceleración más lenta (era 0.12)
 const FRICTION = 0.90;        // Fricción (más alto = menos deslizamiento)
 
 let velocity = 0;
@@ -149,12 +149,12 @@ const statusIndicator = document.getElementById("statusIndicator");
 
 recBtn.onclick = () => {
   if (playing) {
-    updateStatus("⚠️ Detén la reproducción primero");
+    updateStatus("⚠️ Stop playback first");
     return;
   }
   
   if (recording) {
-    updateStatus("⚠️ Ya estás grabando");
+    updateStatus("⚠️ Already recording");
     return;
   }
   
@@ -164,12 +164,12 @@ recBtn.onclick = () => {
   recBtn.classList.add("recording");
   recordingIndicator.classList.add("active");
   saveBtn.disabled = false;
-  updateStatus("🔴 Grabando... Presiona SAVE cuando termines");
+  updateStatus("🔴 Recording... Press SAVE when done");
 };
 
 saveBtn.onclick = () => {
   if (!recording) {
-    updateStatus("⚠️ Presiona REC primero para grabar");
+    updateStatus("⚠️ Press REC first to record");
     return;
   }
   
@@ -178,10 +178,10 @@ saveBtn.onclick = () => {
   recordingIndicator.classList.remove("active");
   
   if (recordedPath.length > 0) {
-    updateStatus(`✅ ¡Guardado! ${recordedPath.length} frames - Presiona PLAY`);
+    updateStatus(`✅ Saved! ${recordedPath.length} frames - Press PLAY`);
   } else {
     recordedPath = [];
-    updateStatus("⚠️ No se grabó ningún movimiento");
+    updateStatus("⚠️ No movement recorded");
   }
 };
 
@@ -194,12 +194,12 @@ const resetBtn = document.getElementById("resetBtn");
 
 playBtn.onclick = () => {
   if (recordedPath.length === 0) {
-    updateStatus("⚠️ Primero graba un movimiento");
+    updateStatus("⚠️ Record a movement first");
     return;
   }
   
   if (recording) {
-    updateStatus("⚠️ Guarda la grabación primero");
+    updateStatus("⚠️ Save the recording first");
     return;
   }
   
@@ -208,7 +208,7 @@ playBtn.onclick = () => {
   lastFrameIndex = 0;
   playBtn.disabled = true;
   pauseBtn.disabled = false;
-  updateStatus("▶️ Reproduciendo...");
+  updateStatus("▶️ Playing...");
   
   playRecordedPath();
 };
@@ -223,7 +223,7 @@ pauseBtn.onclick = () => {
     playbackTimeout = null;
   }
   
-  updateStatus("⏸️ Pausado");
+  updateStatus("⏸️ Paused");
 };
 
 resetBtn.onclick = () => {
@@ -250,7 +250,7 @@ resetBtn.onclick = () => {
   playBtn.disabled = false;
   pauseBtn.disabled = true;
   
-  updateStatus("🔄 Reiniciado - Listo para grabar");
+  updateStatus("🔄 Reset - Ready to record");
 };
 
 /* =====================
@@ -280,12 +280,12 @@ function playRecordedPath() {
     robot.y = lastFrame.y;
     robot.angle = lastFrame.angle;
     
-    updateStatus("⏳ Esperando para repetir...");
+    updateStatus("⏳ Waiting to repeat...");
     lastFrameIndex = 0;
     playbackTimeout = setTimeout(() => {
       if (playing) {
         playbackStartTime = performance.now();
-        updateStatus("▶️ Reproduciendo...");
+        updateStatus("▶️ Playing...");
         playRecordedPath();
       }
     }, 1500);
@@ -349,7 +349,7 @@ trackMenu.onclick = (e) => {
   if (e.target.dataset.track) {
     bg.src = e.target.dataset.track;
     trackMenu.classList.remove("active");
-    updateStatus(`🎨 Pista cambiada`);
+    updateStatus(`🎨 Track changed`);
   }
 };
 
@@ -392,19 +392,19 @@ scene.addEventListener("drop", (e) => {
   if (file && file.type.startsWith("image/")) {
     loadCustomTrack(file);
   } else {
-    updateStatus("⚠️ Por favor arrastra solo archivos de imagen");
+    updateStatus("⚠️ Please drag only image files");
   }
 });
 
 function loadCustomTrack(file) {
   if (!file.type.startsWith("image/")) {
-    updateStatus("⚠️ Solo se permiten archivos de imagen");
+    updateStatus("⚠️ Only image files allowed");
     return;
   }
   
   const maxSize = 10 * 1024 * 1024;
   if (file.size > maxSize) {
-    updateStatus("⚠️ La imagen es demasiado grande (máx 10MB)");
+    updateStatus("⚠️ Image too large (max 10MB)");
     return;
   }
   
@@ -412,11 +412,11 @@ function loadCustomTrack(file) {
   
   reader.onload = (e) => {
     bg.src = e.target.result;
-    updateStatus(`✅ Pista personalizada cargada: ${file.name}`);
+    updateStatus(`✅ Custom track loaded: ${file.name}`);
   };
   
   reader.onerror = () => {
-    updateStatus("❌ Error al cargar la imagen");
+    updateStatus("❌ Error loading image");
   };
   
   reader.readAsDataURL(file);
@@ -526,4 +526,4 @@ window.addEventListener("resize", () => {
 
 // INICIAR
 requestAnimationFrame(loop);
-updateStatus("Listo para grabar");
+updateStatus("Ready to record");

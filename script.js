@@ -1,8 +1,8 @@
 // Program URLs - CONFIGURACIÓN IMPORTANTE
 const programURLs = {
-    1: 'program1/index.html',  // LED Sequencer
-    2: 'program2/index.html',  // Pattern Designer  
-    3: 'program3/index.html'   // Animation Studio
+    1: 'path/index.html',  // Motion Builder
+    2: 'drive/index.html',  // Free Drive Studio
+    3: 'led/index.html'   // LED Animation Lab
 };
 
 // Initialize the landing page
@@ -16,232 +16,203 @@ document.addEventListener('DOMContentLoaded', () => {
 // Initialize program cards with click handlers
 function initializeProgramCards() {
     const programCards = document.querySelectorAll('.program-card');
-    
+
     programCards.forEach(card => {
-        // Click handler
         card.addEventListener('click', () => {
-            const programNumber = parseInt(card.dataset.program);
-            navigateToProgram(programNumber);
+            navigateToProgram(parseInt(card.dataset.program));
         });
-        
+
         // Keyboard accessibility
         card.setAttribute('tabindex', '0');
         card.setAttribute('role', 'button');
-        card.setAttribute('aria-label', `Programa ${card.dataset.program}: ${card.querySelector('.program-title').textContent}`);
-        
-        // Enter/Space key handler
+        card.setAttribute('aria-label', `Program ${card.dataset.program}: ${card.querySelector('.program-title').textContent}`);
+
         card.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
-                const programNumber = parseInt(card.dataset.program);
-                navigateToProgram(programNumber);
+                navigateToProgram(parseInt(card.dataset.program));
             }
         });
-        
-        // Add ripple effect on click
-        card.addEventListener('click', (e) => {
-            createRipple(e, card);
-        });
+
+        // Ripple effect
+        card.addEventListener('click', (e) => createRipple(e, card));
     });
 }
 
 // Navigate to selected program
 function navigateToProgram(programNumber) {
     const card = document.querySelector(`[data-program="${programNumber}"]`);
-    
-    // Add loading state
     card.classList.add('loading');
-    
-    // Get the URL for the program
+
     const programURL = programURLs[programNumber];
-    
     if (!programURL) {
         console.error(`No URL configured for program ${programNumber}`);
         card.classList.remove('loading');
-        showError(`Programa ${programNumber} no está disponible aún`);
+        showError(`Program ${programNumber} is not available yet`);
         return;
     }
-    
-    // Add slight delay for visual feedback
-    setTimeout(() => {
-        // Navigate to the program
-        window.location.href = programURL;
-    }, 300);
+
+    setTimeout(() => { window.location.href = programURL; }, 300);
 }
 
-// Create ripple effect on click
+// Ripple effect on click
 function createRipple(event, element) {
     const ripple = document.createElement('div');
-    const rect = element.getBoundingClientRect();
-    const size = Math.max(rect.width, rect.height);
+    const rect   = element.getBoundingClientRect();
+    const size   = Math.max(rect.width, rect.height);
     const x = event.clientX - rect.left - size / 2;
-    const y = event.clientY - rect.top - size / 2;
-    
+    const y = event.clientY - rect.top  - size / 2;
+
     ripple.style.cssText = `
         position: absolute;
-        width: ${size}px;
-        height: ${size}px;
+        width: ${size}px; height: ${size}px;
         border-radius: 50%;
-        background: rgba(79, 195, 247, 0.3);
-        top: ${y}px;
-        left: ${x}px;
+        background: rgba(79,195,247,0.3);
+        top: ${y}px; left: ${x}px;
         pointer-events: none;
         transform: scale(0);
         animation: ripple-animation 0.6s ease-out;
         z-index: 0;
     `;
-    
-    element.style.position = 'relative';
-    element.style.overflow = 'hidden';
+
     element.appendChild(ripple);
-    
-    ripple.addEventListener('animationend', () => {
-        ripple.remove();
-    });
+    ripple.addEventListener('animationend', () => ripple.remove());
 }
 
-// Add ripple animation to CSS
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes ripple-animation {
-        to {
-            transform: scale(2);
-            opacity: 0;
-        }
-    }
-`;
-document.head.appendChild(style);
+const rippleStyle = document.createElement('style');
+rippleStyle.textContent = `@keyframes ripple-animation { to { transform: scale(2.5); opacity: 0; } }`;
+document.head.appendChild(rippleStyle);
 
-// Logo fallback if image doesn't load
+// Logo fallback con animación
 function initializeLogoFallback() {
     const logoImage = document.getElementById('logoImage');
+    const logoFallback = document.querySelector('.logo-fallback');
     
-    if (!logoImage) return;
-    
+    if (!logoImage || !logoFallback) return;
+
     logoImage.addEventListener('error', () => {
         logoImage.classList.add('error');
-        
-        // Create fallback text
-        const fallback = document.createElement('h1');
-        fallback.className = 'logo-fallback';
-        fallback.textContent = 'CyberPi Suite';
-        
-        logoImage.parentElement.appendChild(fallback);
+        logoFallback.style.display = 'block';
+        logoFallback.style.animation = 'fadeInUp 0.6s ease-out';
     });
+
+    // Preload check
+    if (logoImage.complete && logoImage.naturalHeight === 0) {
+        logoImage.classList.add('error');
+        logoFallback.style.display = 'block';
+    }
 }
 
 // Keyboard navigation between cards
 function addKeyboardNavigation() {
     document.addEventListener('keydown', (e) => {
-        const programCards = Array.from(document.querySelectorAll('.program-card'));
-        const activeElement = document.activeElement;
-        const currentIndex = programCards.indexOf(activeElement);
+        const cards = Array.from(document.querySelectorAll('.program-card'));
+        const idx   = cards.indexOf(document.activeElement);
+        if (idx === -1) return;
+
+        let next = idx;
         
-        if (currentIndex === -1) return;
-        
-        let newIndex = currentIndex;
-        
-        switch (e.key) {
-            case 'ArrowRight':
-            case 'ArrowDown':
-                e.preventDefault();
-                newIndex = (currentIndex + 1) % programCards.length;
-                break;
-            case 'ArrowLeft':
-            case 'ArrowUp':
-                e.preventDefault();
-                newIndex = (currentIndex - 1 + programCards.length) % programCards.length;
-                break;
-            default:
-                return;
+        // Desktop: arrow left/right
+        if (e.key === 'ArrowRight') { 
+            e.preventDefault(); 
+            next = (idx + 1) % cards.length; 
+        }
+        if (e.key === 'ArrowLeft') { 
+            e.preventDefault(); 
+            next = (idx - 1 + cards.length) % cards.length; 
         }
         
-        programCards[newIndex].focus();
+        // Mobile vertical: arrow up/down
+        if (window.matchMedia('(orientation: portrait)').matches) {
+            if (e.key === 'ArrowDown') { 
+                e.preventDefault(); 
+                next = (idx + 1) % cards.length; 
+            }
+            if (e.key === 'ArrowUp') { 
+                e.preventDefault(); 
+                next = (idx - 1 + cards.length) % cards.length; 
+            }
+        }
+        
+        cards[next].focus();
+    });
+
+    // Número directo (1, 2, 3)
+    document.addEventListener('keydown', (e) => {
+        if (e.target.matches('input, textarea')) return;
+        
+        const num = parseInt(e.key);
+        if (num >= 1 && num <= 3 && programURLs[num]) {
+            e.preventDefault();
+            navigateToProgram(num);
+        }
     });
 }
 
-// Add staggered animation delays
+// Staggered animation delays
 function addAnimationDelays() {
-    const cards = document.querySelectorAll('.program-card');
-    cards.forEach((card, index) => {
-        card.style.animationDelay = `${0.1 * (index + 1)}s`;
+    document.querySelectorAll('.program-card').forEach((card, i) => {
+        card.style.animationDelay = `${0.1 * (i + 1)}s`;
     });
 }
 
-// Show error message
+// Error toast mejorado
 function showError(message) {
-    const errorDiv = document.createElement('div');
-    errorDiv.style.cssText = `
-        position: fixed;
-        top: 20px;
+    const toast = document.createElement('div');
+    toast.className = 'error-toast';
+    toast.style.cssText = `
+        position: fixed; 
+        top: 20px; 
         right: 20px;
-        background: #ff5252;
+        background: linear-gradient(135deg, #ff5252, #f44336);
         color: white;
-        padding: 16px 24px;
-        border-radius: 12px;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-        font-weight: 500;
-        z-index: 1000;
-        animation: slideInRight 0.3s ease-out;
+        padding: 16px 24px; 
+        border-radius: 14px;
+        box-shadow: 0 6px 20px rgba(255,82,82,.4);
+        font-weight: 600; 
+        font-size: 0.95rem;
+        z-index: 2000;
+        animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        max-width: 90vw;
     `;
-    errorDiv.textContent = message;
-    
-    document.body.appendChild(errorDiv);
+    toast.textContent = message;
+    document.body.appendChild(toast);
     
     setTimeout(() => {
-        errorDiv.style.animation = 'slideOutRight 0.3s ease-out';
-        setTimeout(() => errorDiv.remove(), 300);
+        toast.style.animation = 'slideOutRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+        setTimeout(() => toast.remove(), 400);
     }, 3000);
 }
 
-// Add error animations
 const errorStyle = document.createElement('style');
 errorStyle.textContent = `
-    @keyframes slideInRight {
-        from {
-            transform: translateX(400px);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
+    @keyframes slideInRight  { 
+        from { transform: translateX(120%); opacity: 0; } 
+        to { transform: translateX(0); opacity: 1; } 
     }
-    
-    @keyframes slideOutRight {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(400px);
-            opacity: 0;
-        }
+    @keyframes slideOutRight { 
+        from { transform: translateX(0); opacity: 1; } 
+        to { transform: translateX(120%); opacity: 0; } 
     }
 `;
 document.head.appendChild(errorStyle);
 
-// Add hover sound effect (optional - can be commented out)
-function addHoverSounds() {
-    const cards = document.querySelectorAll('.program-card');
-    
-    cards.forEach(card => {
-        card.addEventListener('mouseenter', () => {
-            // Uncomment to add hover sound
-            // const audio = new Audio('hover-sound.mp3');
-            // audio.volume = 0.2;
-            // audio.play().catch(e => console.log('Audio play failed:', e));
-        });
-    });
-}
+// Debug info
+console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+console.log('🎮 VicubyteGames Suite - Landing Page');
+console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+console.log('✅ Initialized successfully');
+console.log('📦 Programs configured:', programURLs);
+console.log('🎯 Keyboard shortcuts:');
+console.log('   • 1, 2, 3: Quick navigate');
+console.log('   • ←→: Navigate cards (landscape)');
+console.log('   • ↑↓: Navigate cards (portrait)');
+console.log('   • Enter/Space: Select card');
+console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
-// Log initialization
-console.log('CyberPi Suite - Landing Page Initialized');
-console.log('Programs configured:', programURLs);
-console.log('Keyboard navigation: Arrow keys to navigate, Enter/Space to select');
-
-// Export for debugging
-window.cyberpiSuite = {
-    navigateToProgram,
-    programURLs
+// Global API
+window.cyberpiSuite = { 
+    navigateToProgram, 
+    programURLs,
+    version: '2.0'
 };

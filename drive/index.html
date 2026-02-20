@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Free Drive Studio</title>
+  <link rel="icon" href="favicon.png" type="image/png">
+  <link rel="stylesheet" href="style.css" />
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Poppins:wght@600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome -->
+  <script src="https://kit.fontawesome.com/256200ed53.js" crossorigin="anonymous"></script>
+</head>
+<body>
+
+<!-- HOME BUTTON -->
+<button class="btn-home" id="homeButton" title="Home">
+    <i class="fa-solid fa-house"></i>
+</button>
+
+<!-- TRACK SELECTOR BUTTON -->
+<div class="track-selector" title="Track">
+  <button id="trackBtn" class="btn-track">
+    <i class="fa-solid fa-image"></i>
+  </button>
+  <div class="track-menu" id="trackMenu">
+    <button data-track="pista1.png" class="track-option">
+      <i class="fa-solid fa-trophy"></i> Arena Track
+    </button>
+    <button data-track="pista2.png" class="track-option">
+      <i class="fa-solid fa-futbol"></i> Field Track
+    </button>
+    <button id="whiteTrackBtn" class="track-option">
+      <i class="fa-solid fa-square"></i> White Track
+    </button>
+    <div class="track-divider"></div>
+    <label for="customTrack" class="track-option upload-option">
+      <i class="fa-solid fa-upload"></i> Upload Track
+      <input type="file" id="customTrack" accept="image/*" hidden />
+    </label>
+  </div>
+</div>
+
+<!-- SCENE -->
+<div class="scene" id="scene">
+  <img src="pista1.png" class="background" id="background" alt="Track" />
+  <canvas id="canvas"></canvas>
+  <img src="robot.png" id="robot" alt="Robot" />
+  
+  <!-- Drag & Drop Zone -->
+  <div class="drop-zone" id="dropZone">
+    <div class="drop-zone-content">
+      <i class="fa-solid fa-cloud-arrow-up"></i>
+      <p>Drag an image here</p>
+      <span>or click "Upload Track"</span>
+    </div>
+  </div>
+</div>
+
+<!-- LEFT CONTROLS (GROUPED VERTICALLY) -->
+<div class="left-controls">
+  <!-- GROUP 1: PLAY/PAUSE/RESET -->
+  <div class="control-group">
+    <button id="playBtn" class="control-btn play-btn" title="Play">
+      <i class="fa-solid fa-play"></i>
+    </button>
+    <button id="pauseBtn" class="control-btn pause-btn" title="Pause">
+      <i class="fa-solid fa-pause"></i>
+    </button>
+    <button id="resetBtn" class="control-btn reset-btn" title="Reset">
+      <i class="fa-solid fa-trash"></i>
+    </button>
+  </div>
+
+  <!-- GROUP 2: REC/SAVE -->
+  <div class="record-group">
+    <button id="recBtn" class="circle-btn rec-btn" title="Record">
+      <i class="fa-solid fa-circle"></i>
+    </button>
+    <button id="saveBtn" class="circle-btn save-btn" title="Save">
+      <i class="fa-solid fa-floppy-disk"></i>
+    </button>
+  </div>
+</div>
+
+<!-- DPAD RIGHT -->
+<div class="dpad">
+  <button id="upBtn" class="dpad-btn dpad-up" title="Forward">
+    <i class="fa-solid fa-chevron-up"></i>
+  </button>
+  <div class="dpad-row">
+    <button id="leftBtn" class="dpad-btn dpad-left" title="Left">
+      <i class="fa-solid fa-chevron-left"></i>
+    </button>
+    <div class="dpad-center"></div>
+    <button id="rightBtn" class="dpad-btn dpad-right" title="Right">
+      <i class="fa-solid fa-chevron-right"></i>
+    </button>
+  </div>
+  <button id="downBtn" class="dpad-btn dpad-down" title="Backward">
+    <i class="fa-solid fa-chevron-down"></i>
+  </button>
+</div>
+
+<!-- RECORDING INDICATOR -->
+<div class="recording-indicator" id="recordingIndicator">
+  <i class="fa-solid fa-circle"></i>
+  <span>RECORDING...</span>
+</div>
+
+<!-- STATUS INDICATOR -->
+<div class="status-indicator" id="statusIndicator">
+  Ready to record
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

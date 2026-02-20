@@ -1,0 +1,535 @@
+:root {
+  --bg-primary: #f5f5f5;
+  --bg-white: #ffffff;
+  --bg-gray-light: #fafafa;
+  
+  --primary-blue: #4FC3F7;
+  --primary-blue-hover: #29B6F6;
+  --primary-blue-light: #E1F5FE;
+  
+  --text-primary: #333333;
+  --text-secondary: #666666;
+  --text-muted: #999999;
+  
+  --border-color: #e0e0e0;
+  --border-active: #4FC3F7;
+  
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.12);
+  
+  --transition: 0.2s ease;
+  
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  user-select: none;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-primary);
+  overflow: hidden;
+  font-family: var(--font-family);
+}
+
+/* ===========================
+   ESPACIO DE TRABAJO
+=========================== */
+.scene {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--bg-white);
+  overflow: hidden;
+}
+
+canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#robot {
+  position: absolute;
+  width: clamp(50px, 8vmin, 80px);
+  pointer-events: none;
+  transform-origin: center center;
+  transition: transform 0.35s ease-in-out,
+              left 0.45s cubic-bezier(0.4, 0.0, 0.2, 1),
+              top 0.45s cubic-bezier(0.4, 0.0, 0.2, 1);
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
+}
+
+/* ===========================
+   BOTÓN HOME
+=========================== */
+.btn-home {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  width: 48px;
+  height: 48px;
+  background: var(--bg-white);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition);
+  z-index: 1000;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-home:hover {
+  border-color: var(--primary-blue);
+  background: var(--primary-blue-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-home i {
+  color: var(--text-secondary);
+  transition: color var(--transition);
+  font-size: 20px;
+}
+
+.btn-home:hover i {
+  color: var(--primary-blue);
+}
+
+/* ===========================
+   CONTROLES IZQUIERDA
+=========================== */
+.left-controls {
+  position: fixed;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 100;
+}
+
+.control-btn {
+  width: 48px;
+  height: 48px;
+  background: var(--bg-white);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-secondary);
+  font-size: 20px;
+}
+
+.control-btn:hover {
+  transform: scale(1.05);
+  box-shadow: var(--shadow-md);
+}
+
+.control-btn:active {
+  transform: scale(0.95);
+}
+
+.play-btn:hover {
+  background: #E8F5E9;
+  border-color: #4CAF50;
+}
+
+.play-btn:hover i {
+  color: #4CAF50;
+}
+
+.pause-btn:hover {
+  background: #FFF3E0;
+  border-color: #FF9800;
+}
+
+.pause-btn:hover i {
+  color: #FF9800;
+}
+
+.reset-btn:hover {
+  background: #FFEBEE;
+  border-color: #F44336;
+}
+
+.reset-btn:hover i {
+  color: #F44336;
+}
+
+/* ===========================
+   DPAD DERECHA
+=========================== */
+.dpad {
+  position: fixed;
+  right: 40px;
+  bottom: 90px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  z-index: 100;
+}
+
+.dpad-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.dpad-center {
+  width: 48px;
+  height: 48px;
+  background: transparent;
+  border-radius: 12px;
+  border: 2px solid transparent;
+}
+
+.dpad-btn {
+  width: 48px;
+  height: 48px;
+  background: var(--bg-white);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  color: var(--text-secondary);
+  font-size: 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+
+.dpad-btn:hover {
+  border-color: var(--primary-blue);
+  background: var(--primary-blue-light);
+  transform: scale(1.05);
+  box-shadow: var(--shadow-md);
+}
+
+.dpad-btn:hover i {
+  color: var(--primary-blue);
+}
+
+.dpad-btn:active {
+  transform: scale(0.95);
+  background: var(--primary-blue-light);
+  border-color: var(--primary-blue);
+}
+
+.dpad-btn:active i {
+  color: var(--primary-blue);
+}
+
+.dpad-btn:disabled {
+  background: #f0f0f0;
+  border-color: #d0d0d0;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.dpad-btn:disabled i {
+  color: #bdbdbd;
+}
+
+/* ===========================
+   CONTROLES INFERIORES
+=========================== */
+.bottom-controls {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 100;
+  width: 75%;
+  max-width: 900px;
+  padding: 0;
+}
+
+.toggle-seq-btn {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  background: var(--bg-white);
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--transition);
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
+}
+
+.toggle-seq-btn:hover {
+  border-color: var(--primary-blue);
+  background: var(--primary-blue-light);
+  transform: scale(1.05);
+  box-shadow: var(--shadow-md);
+}
+
+.toggle-seq-btn i {
+  color: var(--text-secondary);
+  font-size: 18px;
+  transition: color var(--transition);
+}
+
+.toggle-seq-btn:hover i {
+  color: var(--primary-blue);
+}
+
+/* ===========================
+   SEQ WRAPPER
+   Agrupa barra de flechas + botón borrar
+=========================== */
+.seq-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* ===========================
+   BARRA DE SECUENCIA
+=========================== */
+.sequence-box {
+  flex: 1;
+  height: 48px;
+  background: var(--bg-white);
+  border: 2px dashed var(--border-color);
+  border-radius: 12px;
+  padding: 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 1px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+  box-shadow: var(--shadow-sm);
+  min-width: 0;
+}
+
+.sequence-box::-webkit-scrollbar {
+  height: 3px;
+}
+
+.sequence-box::-webkit-scrollbar-track {
+  background: var(--bg-gray-light);
+  border-radius: 2px;
+}
+
+.sequence-box::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 2px;
+}
+
+.sequence-box::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* ===========================
+   FLECHAS - texto plano, sin recuadro
+=========================== */
+.seq-arrow {
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 2px;
+  border-radius: 4px;
+  transition: background 0.12s ease;
+  touch-action: none;
+}
+
+.seq-arrow:hover {
+  background: var(--primary-blue-light);
+}
+
+/* Barra de secuencia deshabilitada durante reproducción */
+.sequence-box--disabled {
+  background: #f0f0f0;
+  border-color: #d0d0d0;
+  cursor: not-allowed;
+}
+
+.sequence-box--disabled .seq-arrow {
+  color: #bdbdbd;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.sequence-box--disabled .seq-arrow:hover {
+  background: transparent;
+}
+
+/* ===========================
+   CURSOR DE TEXTO
+   Línea vertical azul parpadeante
+=========================== */
+.seq-cursor {
+  display: inline-block;
+  width: 2px;
+  height: 24px;
+  background: var(--primary-blue);
+  border-radius: 1px;
+  flex-shrink: 0;
+  animation: blink 1s step-end infinite;
+  margin: 0 1px;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0; }
+}
+
+/* ===========================
+   BOTÓN BORRAR (celeste)
+=========================== */
+.delete-btn {
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  background: var(--bg-white);
+  border: 2px solid var(--primary-blue);
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all var(--transition);
+  box-shadow: var(--shadow-sm);
+  touch-action: none;
+}
+
+.delete-btn i {
+  color: var(--primary-blue);
+  font-size: 18px;
+  transition: color var(--transition);
+}
+
+.delete-btn:not(:disabled):hover {
+  background: var(--primary-blue);
+  border-color: var(--primary-blue-hover);
+  transform: scale(1.05);
+  box-shadow: var(--shadow-md);
+}
+
+.delete-btn:not(:disabled):hover i { color: #ffffff; }
+.delete-btn:not(:disabled):active  { transform: scale(0.95); }
+
+.delete-btn:disabled {
+  border-color: var(--border-color);
+  cursor: not-allowed;
+}
+
+.delete-btn:disabled i { color: var(--text-muted); }
+
+/* ===========================
+   RESPONSIVE - Tablet
+=========================== */
+@media (max-width: 1024px) {
+  .control-btn { width: 44px; height: 44px; font-size: 18px; }
+  .dpad-btn { width: 44px; height: 44px; font-size: 18px; }
+  .dpad-center { width: 44px; height: 44px; }
+  .toggle-seq-btn { width: 44px; height: 44px; min-width: 44px; }
+  .delete-btn { width: 44px; height: 44px; min-width: 44px; }
+  .sequence-box { height: 44px; }
+  .seq-arrow { font-size: 17px; }
+}
+
+/* ===========================
+   RESPONSIVE - Mobile
+=========================== */
+@media (max-width: 768px) {
+  .btn-home { width: 40px; height: 40px; top: 12px; left: 12px; }
+  .btn-home i { font-size: 16px; }
+  .left-controls { left: 12px; gap: 10px; }
+  .control-btn { width: 40px; height: 40px; font-size: 16px; }
+  .dpad-btn { width: 40px; height: 40px; font-size: 16px; }
+  .dpad-center { width: 40px; height: 40px; }
+  .dpad { right: 16px; bottom: 80px; }
+  .toggle-seq-btn { width: 40px; height: 40px; min-width: 40px; }
+  .toggle-seq-btn i { font-size: 16px; }
+  .sequence-box { height: 40px; padding: 0 8px; }
+  .seq-arrow { font-size: 16px; }
+  .seq-cursor { height: 20px; }
+  .delete-btn { width: 40px; height: 40px; min-width: 40px; }
+  .delete-btn i { font-size: 16px; }
+  .seq-wrapper { gap: 6px; }
+  .bottom-controls { width: 75%; bottom: 16px; gap: 10px; }
+}
+
+@media (max-width: 768px) and (orientation: portrait) {
+  .bottom-controls { width: 85%; }
+  .dpad { bottom: 90px; }
+}
+
+/* ===========================
+   RESPONSIVE - Mobile pequeño
+=========================== */
+@media (max-width: 480px) {
+  .btn-home { width: 36px; height: 36px; top: 10px; left: 10px; }
+  .btn-home i { font-size: 14px; }
+  .left-controls { left: 10px; gap: 8px; }
+  .control-btn { width: 36px; height: 36px; font-size: 14px; }
+  .dpad-btn { width: 36px; height: 36px; font-size: 14px; }
+  .dpad-center { width: 36px; height: 36px; }
+  .dpad { right: 10px; bottom: 80px; gap: 6px; }
+  .toggle-seq-btn { width: 36px; height: 36px; min-width: 36px; }
+  .toggle-seq-btn i { font-size: 14px; }
+  .sequence-box { height: 36px; padding: 0 6px; }
+  .seq-arrow { font-size: 15px; }
+  .seq-cursor { height: 18px; }
+  .delete-btn { width: 36px; height: 36px; min-width: 36px; }
+  .delete-btn i { font-size: 14px; }
+  .seq-wrapper { gap: 5px; }
+  .bottom-controls { width: 80%; bottom: 14px; gap: 8px; }
+}
+
+@media (max-width: 480px) and (orientation: portrait) {
+  .bottom-controls { width: 88%; }
+  .dpad { bottom: 90px; }
+}
+
+/* ===========================
+   RESPONSIVE - Landscape bajo
+=========================== */
+@media (orientation: landscape) and (max-height: 600px) {
+  .btn-home { width: 36px; height: 36px; top: 12px; left: 12px; }
+  .btn-home i { font-size: 14px; }
+  .left-controls { left: 12px; gap: 8px; }
+  .control-btn { width: 36px; height: 36px; font-size: 14px; }
+  .dpad { bottom: 56px; right: 15px; gap: 6px; }
+  .dpad-btn { width: 36px; height: 36px; font-size: 14px; }
+  .dpad-center { width: 36px; height: 36px; }
+  .toggle-seq-btn { width: 36px; height: 36px; min-width: 36px; }
+  .toggle-seq-btn i { font-size: 14px; }
+  .sequence-box { height: 36px; font-size: 12px; }
+  .seq-arrow { font-size: 14px; }
+  .seq-cursor { height: 18px; }
+  .delete-btn { width: 36px; height: 36px; min-width: 36px; }
+  .delete-btn i { font-size: 14px; }
+  .bottom-controls { bottom: 10px; width: 65%; gap: 8px; }
+}

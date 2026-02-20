@@ -4,9 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>VicubyteGames</title>
+    <link rel="icon" href="favicon.png" type="image/png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/256200ed53.js" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -15,6 +17,8 @@
         <header class="header">
             <div class="logo-container">
                 <img src="title.png" alt="CyberPi Suite" class="logo-image" id="logoImage">
+                <!-- Fallback si la imagen no carga -->
+                <h1 class="logo-fallback" style="display: none;">CyberPi Suite</h1>
             </div>
         </header>
 
@@ -22,19 +26,17 @@
         <main class="programs-section">
             <div class="programs-grid">
                 
-                <!-- Program 1 - LED Sequencer -->
-                <div class="program-card" data-program="1" id="program1">
+                <!-- Program 1 - Motion Builder -->
+                <div class="program-card" data-program="1" id="path">
                     <div class="program-number">1</div>
                     <div class="program-content">
                         <div class="program-icon">
-                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <circle cx="12" cy="12" r="6"></circle>
-                                <circle cx="12" cy="12" r="2"></circle>
-                            </svg>
+                            <i class="fa-solid fa-road"></i>
                         </div>
-                        <h2 class="program-title">Motion Builder</h2>
-                        <p class="program-description">Program step-by-step robot movements</p>
+                        <div class="program-info">
+                            <h2 class="program-title">Path Builder</h2>
+                            <p class="program-description">Program step-by-step robot movements</p>
+                        </div>
                     </div>
                     <div class="program-arrow">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -44,20 +46,17 @@
                     </div>
                 </div>
 
-                <!-- Program 2 - Pattern Designer -->
-                <div class="program-card" data-program="2" id="program2">
+                <!-- Program 2 - Free Drive Studio -->
+                <div class="program-card" data-program="2" id="drive">
                     <div class="program-number">2</div>
                     <div class="program-content">
                         <div class="program-icon">
-                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <rect x="3" y="3" width="7" height="7"></rect>
-                                <rect x="14" y="3" width="7" height="7"></rect>
-                                <rect x="14" y="14" width="7" height="7"></rect>
-                                <rect x="3" y="14" width="7" height="7"></rect>
-                            </svg>
+                            <i class="fa-solid fa-spiral"></i>
                         </div>
-                        <h2 class="program-title">Free Drive Studio</h2>
-                        <p class="program-description">Drive the robot in real time and record its path</p>
+                        <div class="program-info">
+                            <h2 class="program-title">Free Drive Studio</h2>
+                            <p class="program-description">Drive the robot in real time and record its path</p>
+                        </div>
                     </div>
                     <div class="program-arrow">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -67,17 +66,17 @@
                     </div>
                 </div>
 
-                <!-- Program 3 - Animation Studio -->
-                <div class="program-card" data-program="3" id="program3">
+                <!-- Program 3 - LED Animation Lab -->
+                <div class="program-card" data-program="3" id="led">
                     <div class="program-number">3</div>
                     <div class="program-content">
                         <div class="program-icon">
-                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <polygon points="5 3 19 12 5 21 5 3"></polygon>
-                            </svg>
+                            <i class="fa-solid fa-palette"></i>
                         </div>
-                        <h2 class="program-title">LED Animation Lab</h2>
-                        <p class="program-description">Create and preview LED light animations</p>
+                        <div class="program-info">
+                            <h2 class="program-title">LED Animation Lab</h2>
+                            <p class="program-description">Create and preview LED light animations</p>
+                        </div>
                     </div>
                     <div class="program-arrow">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

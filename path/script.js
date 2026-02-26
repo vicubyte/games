@@ -2,18 +2,17 @@ const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const robotImg = document.getElementById("robot");
 
-const playBtn = document.getElementById("playBtn");
-const stopBtn = document.getElementById("stopBtn");
-const resetBtn = document.getElementById("resetBtn");
+const playBtn    = document.getElementById("playBtn");
+const stopBtn    = document.getElementById("stopBtn");
+const resetBtn   = document.getElementById("resetBtn");
 const toggleSeqBtn = document.getElementById("toggleSeq");
-const sequenceBox = document.getElementById("sequenceBox");
-const deleteBtn = document.getElementById("deleteBtn");
-const seqWrapper = document.getElementById("seqWrapper");
-
-const scene = document.querySelector(".scene");
+const sequenceBox  = document.getElementById("sequenceBox");
+const deleteBtn    = document.getElementById("deleteBtn");
+const seqWrapper   = document.getElementById("seqWrapper");
+const scene        = document.querySelector(".scene");
 
 /* =====================
-   ESCENA (ORIGINAL)
+   ESCENA
 ===================== */
 let SCENE_WIDTH;
 let SCENE_HEIGHT;
@@ -26,53 +25,106 @@ function getSTEP() {
 const RESTART_DELAY = 500;
 
 /* =====================
-   ROBOT (ORIGINAL)
+   VELOCIDADES
+   5 niveles: step 1 (más lento) → step 5 (más rápido)
+   Edita los ms de cada nivel según prefieras:
+     step 1 = 1000ms  (tortuga máxima)
+     step 2 =  750ms  (lento)
+     step 3 =  500ms  (medio — default)
+     step 4 =  300ms  (rápido)
+     step 5 =  150ms  (liebre máxima)
+===================== */
+const SPEED_MAP = {
+  1: 1000,
+  2:  750,
+  3:  500,
+  4:  300,
+  5:  150
+};
+
+let currentStep = 3; // default: medio
+
+function getInterval() {
+  return SPEED_MAP[currentStep];
+}
+
+/* =====================
+   INICIALIZAR CONTROL DE VELOCIDAD
+===================== */
+function initSpeedControl() {
+  updateSpeedUI();
+
+  document.querySelectorAll('.speed-dot').forEach(dot => {
+    dot.addEventListener('click', () => {
+      currentStep = parseInt(dot.dataset.step);
+      updateSpeedUI();
+
+      // Si está reproduciendo, aplicar nueva velocidad inmediatamente
+      if (interval !== null) {
+        clearInterval(interval);
+        interval = setInterval(execute, getInterval());
+      }
+    });
+  });
+}
+
+function updateSpeedUI() {
+  const dots = document.querySelectorAll('.speed-dot');
+  const fill  = document.getElementById('speedFill');
+
+  dots.forEach(dot => {
+    const s = parseInt(dot.dataset.step);
+    dot.classList.toggle('speed-dot--active', s === currentStep);
+    // Puntos por debajo o igual al activo se iluminan (fill visual)
+    dot.classList.toggle('speed-dot--filled', s <= currentStep);
+  });
+
+  // fill ocupa desde el punto activo hacia abajo (tortuga)
+  // Los puntos están ordenados 5→1 de arriba a abajo
+  // fill% = porcentaje desde arriba hasta el punto activo
+  // step5=top(0%), step4=25%, step3=50%, step2=75%, step1=100%
+  const fillPct = ((5 - currentStep) / 4) * 100;
+  if (fill) fill.style.height = fillPct + '%';
+}
+
+/* =====================
+   ROBOT
 ===================== */
 let startX = 0;
 let startY = 0;
 
-let robot = {
-  x: 0,
-  y: 0,
-  dir: 0
-};
-
+let robot = { x: 0, y: 0, dir: 0 };
 let visualRotation = 0;
 
 /* =====================
    SECUENCIA
-   CAMBIO: sequence ahora guarda { code, symbol }
-   cursorPos: posición de inserción, solo mouse/tap
 ===================== */
-let sequence = [];
-let cursorPos = 0;
-let index = 0;
-let interval = null;
+let sequence   = [];
+let cursorPos  = 0;
+let index      = 0;
+let interval   = null;
 let restartTimeout = null;
 
 /* =====================
-   FLAGS (ORIGINAL)
+   FLAGS
 ===================== */
-let isPaused = false;
+let isPaused         = false;
 let wasPlayingOnResize = false;
-let isResizing = false;
+let isResizing       = false;
 
 /* =====================
-   CAMINO (ORIGINAL)
+   CAMINO
 ===================== */
 let pathCommands = [];
 let loopCommands = [];
-let pathLocked = false;
+let pathLocked   = false;
 
 /* =====================
-   CALCULAR POSICIÓN (ORIGINAL)
+   CALCULAR POSICIÓN
 ===================== */
 function calcPosition(cmds) {
   const STEP = getSTEP();
-  let cx = startX;
-  let cy = startY;
-  let dir = 0;
-  let rot = 0;
+  let cx = startX, cy = startY, dir = 0, rot = 0;
 
   cmds.forEach(({ cmd }) => {
     if (cmd === 'L') { dir = (dir + 3) % 4; rot -= 90; return; }
@@ -95,17 +147,13 @@ function calcPosition(cmds) {
 }
 
 /* =====================
-   DIBUJO (ORIGINAL)
+   DIBUJO
 ===================== */
-function crisp(v) {
-  return Math.round(v) + 0.5;
-}
+function crisp(v) { return Math.round(v) + 0.5; }
 
 function drawPath() {
   const STEP = getSTEP();
-  let cx = startX;
-  let cy = startY;
-  let dir = 0;
+  let cx = startX, cy = startY, dir = 0;
 
   ctx.setLineDash([8, 6]);
   ctx.lineWidth = 2;
@@ -134,8 +182,7 @@ function drawPath() {
     ctx.lineTo(crisp(nx), crisp(ny));
     ctx.stroke();
 
-    cx = nx;
-    cy = ny;
+    cx = nx; cy = ny;
   });
 
   ctx.setLineDash([]);
@@ -147,20 +194,20 @@ function draw() {
 }
 
 /* =====================
-   ACTUALIZAR ROBOT (ORIGINAL)
+   ACTUALIZAR ROBOT
 ===================== */
 function updateRobot() {
-  robotImg.style.left = robot.x - robotImg.width / 2 + "px";
+  robotImg.style.left = robot.x - robotImg.width  / 2 + "px";
   robotImg.style.top  = robot.y - robotImg.height / 2 + "px";
   robotImg.style.transform = `rotate(${visualRotation}deg)`;
 }
 
 /* =====================
-   MOVIMIENTO (ORIGINAL)
+   MOVIMIENTO
 ===================== */
 function canMove(nx, ny) {
   const margin = robotImg.width / 2 || 35;
-  return nx > margin && nx < SCENE_WIDTH - margin &&
+  return nx > margin && nx < SCENE_WIDTH  - margin &&
          ny > margin && ny < SCENE_HEIGHT - margin;
 }
 
@@ -205,7 +252,7 @@ function right() {
 }
 
 /* =====================
-   DPAD VISUAL (ORIGINAL)
+   DPAD VISUAL
 ===================== */
 function setDpadEnabled(enabled) {
   document.querySelectorAll('.dpad-btn').forEach(btn => {
@@ -214,7 +261,7 @@ function setDpadEnabled(enabled) {
 }
 
 /* =====================
-   STOP (ORIGINAL)
+   STOP
 ===================== */
 function stopPlayback() {
   isPaused = true;
@@ -227,8 +274,7 @@ function stopPlayback() {
 }
 
 /* =====================
-   EJECUCIÓN (ORIGINAL)
-   CAMBIO MÍNIMO: sequence[index] era string, ahora es { code, symbol }
+   EJECUCIÓN
 ===================== */
 function execute() {
   if (isPaused) return;
@@ -245,13 +291,13 @@ function execute() {
       restartTimeout = null;
       if (isPaused) return;
       resetRobotInstant();
-      interval = setInterval(execute, 500);
+      interval = setInterval(execute, getInterval());
     }, RESTART_DELAY);
 
     return;
   }
 
-  const cmd = sequence[index].code;  // CAMBIO: .code en vez de directo
+  const cmd = sequence[index].code;
   if (cmd === "F") forward();
   if (cmd === "B") backward();
   if (cmd === "L") left();
@@ -263,7 +309,7 @@ function execute() {
 }
 
 /* =====================
-   RESET INSTANTÁNEO (ORIGINAL)
+   RESET INSTANTÁNEO
 ===================== */
 function resetRobotInstant() {
   robotImg.style.transition = "none";
@@ -278,27 +324,24 @@ function resetRobotInstant() {
 }
 
 /* =====================
-   CANVAS DPR (ORIGINAL)
+   CANVAS DPR
 ===================== */
 function applyDPR() {
   const dpr = window.devicePixelRatio || 1;
   canvas.width  = SCENE_WIDTH * dpr;
   canvas.height = SCENE_HEIGHT * dpr;
-  canvas.style.width  = SCENE_WIDTH + 'px';
+  canvas.style.width  = SCENE_WIDTH  + 'px';
   canvas.style.height = SCENE_HEIGHT + 'px';
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
 
 /* =====================
    RENDERIZAR SECUENCIA
-   NUEVO: flechas como texto plano + cursor línea azul
-   El cursor se posiciona solo con mouse/tap
 ===================== */
 function renderSequence() {
   sequenceBox.innerHTML = '';
   const playing = interval !== null || restartTimeout !== null;
 
-  // Apariencia deshabilitada durante reproducción
   sequenceBox.classList.toggle('sequence-box--disabled', playing);
 
   if (sequence.length === 0) {
@@ -308,13 +351,19 @@ function renderSequence() {
   }
 
   sequence.forEach((item, i) => {
-    if (!playing && cursorPos === i) {
-      sequenceBox.appendChild(makeCursor());
-    }
+    if (!playing && cursorPos === i) sequenceBox.appendChild(makeCursor());
 
     const span = document.createElement('span');
     span.className = 'seq-arrow';
-    span.textContent = item.symbol;
+    const icon = document.createElement('i');
+    const iconMap = {
+      up:    'fa-arrow-up',
+      down:  'fa-arrow-down',
+      left:  'fa-arrow-left',
+      right: 'fa-arrow-right'
+    };
+    icon.className = `fa-solid ${iconMap[item.symbol] || 'fa-arrow-up'}`;
+    span.appendChild(icon);
 
     span.addEventListener('pointerdown', (e) => {
       if (playing) return;
@@ -328,9 +377,7 @@ function renderSequence() {
     sequenceBox.appendChild(span);
   });
 
-  if (!playing && cursorPos === sequence.length) {
-    sequenceBox.appendChild(makeCursor());
-  }
+  if (!playing && cursorPos === sequence.length) sequenceBox.appendChild(makeCursor());
 
   updateDeleteBtn();
   scrollCursorIntoView();
@@ -349,12 +396,11 @@ function scrollCursorIntoView() {
     if (!cur) return;
     const boxRect = sequenceBox.getBoundingClientRect();
     const curRect = cur.getBoundingClientRect();
-    const margin = 20;
-    if (curRect.right > boxRect.right - margin) {
+    const margin  = 20;
+    if (curRect.right > boxRect.right - margin)
       sequenceBox.scrollLeft += curRect.right - boxRect.right + margin;
-    } else if (curRect.left < boxRect.left + margin) {
+    else if (curRect.left < boxRect.left + margin)
       sequenceBox.scrollLeft -= boxRect.left - curRect.left + margin;
-    }
   });
 }
 
@@ -364,17 +410,14 @@ function scrollCursorIntoView() {
 function updateDeleteBtn() {
   if (!deleteBtn) return;
   const playing = interval !== null || restartTimeout !== null;
-  const canDel = !playing && cursorPos > 0;
-  deleteBtn.disabled = !canDel;
+  const canDel  = !playing && cursorPos > 0;
+  deleteBtn.disabled     = !canDel;
   deleteBtn.style.opacity = canDel ? '1' : '0.35';
   deleteBtn.style.cursor  = canDel ? 'pointer' : 'not-allowed';
 }
 
 /* =====================
    AGREGAR ACCIÓN
-   NUEVO: inserta en cursorPos (no solo al final)
-   El robot y el camino NO se tocan — igual que el original
-   cuando solo se agrega a la lista sin reproducir
 ===================== */
 function addAction(code, symbol) {
   if (interval !== null || restartTimeout !== null) return;
@@ -382,17 +425,15 @@ function addAction(code, symbol) {
   sequence.splice(cursorPos, 0, { code, symbol });
   cursorPos++;
 
-  // Invalidar camino previo (secuencia cambió)
   pathCommands = [];
   loopCommands = [];
-  pathLocked = false;
+  pathLocked   = false;
 
   renderSequence();
 }
 
 /* =====================
    BORRAR A LA IZQUIERDA DEL CURSOR
-   NUEVO: equivalente a Backspace
 ===================== */
 function deleteAtCursor() {
   if (interval !== null || restartTimeout !== null) return;
@@ -403,33 +444,29 @@ function deleteAtCursor() {
 
   pathCommands = [];
   loopCommands = [];
-  pathLocked = false;
+  pathLocked   = false;
 
   renderSequence();
 }
 
 /* =====================
-   CONTROLES (ORIGINAL)
-   CAMBIO MÍNIMO: Play también limpia pathCommands/loopCommands
-   y resetea robot antes de reproducir (secuencia nueva)
+   CONTROLES
 ===================== */
 playBtn.onclick = () => {
   if (interval || sequence.length === 0) return;
 
-  // Secuencia nueva: limpiar estado y robot al inicio
   pathCommands = [];
   loopCommands = [];
-  pathLocked = false;
-  index = 0;
-  cursorPos = sequence.length;
-  isPaused = false;
+  pathLocked   = false;
+  index        = 0;
+  cursorPos    = sequence.length;
+  isPaused     = false;
 
   resetRobotInstant();
   draw();
-
   setDpadEnabled(false);
   renderSequence();
-  interval = setInterval(execute, 500);
+  interval = setInterval(execute, getInterval());
 };
 
 stopBtn.onclick = () => {
@@ -440,15 +477,15 @@ stopBtn.onclick = () => {
 
 resetBtn.onclick = () => {
   stopPlayback();
-  sequence = [];
-  pathCommands = [];
-  loopCommands = [];
-  pathLocked = false;
-  index = 0;
-  cursorPos = 0;
-  isPaused = false;
+  sequence      = [];
+  pathCommands  = [];
+  loopCommands  = [];
+  pathLocked    = false;
+  index         = 0;
+  cursorPos     = 0;
+  isPaused      = false;
   wasPlayingOnResize = false;
-  isResizing = false;
+  isResizing    = false;
   setDpadEnabled(true);
   resetRobotInstant();
   draw();
@@ -467,44 +504,42 @@ if (deleteBtn) {
 }
 
 /* =====================
-   TECLADO (ORIGINAL + CAMBIO MÍNIMO)
-   ↑↓←→ agregan flechas, sin conflicto con cursor
-   Backspace borra a la izquierda del cursor
+   TECLADO
 ===================== */
 document.addEventListener("keydown", e => {
-  if (e.key === "ArrowUp")    addAction("F", "⬆");
-  if (e.key === "ArrowDown")  addAction("B", "⬇");
-  if (e.key === "ArrowLeft")  addAction("L", "⬅");
-  if (e.key === "ArrowRight") addAction("R", "➡");
+  if (e.key === "ArrowUp")    addAction("F", "up");
+  if (e.key === "ArrowDown")  addAction("B", "down");
+  if (e.key === "ArrowLeft")  addAction("L", "left");
+  if (e.key === "ArrowRight") addAction("R", "right");
   if (e.key === "Backspace")  deleteAtCursor();
   if (e.key === "h")          toggleSeqBtn.click();
 });
 
 /* =====================
-   INICIALIZACIÓN (ORIGINAL)
+   INICIALIZACIÓN
 ===================== */
 function initScene() {
-  SCENE_WIDTH = scene.clientWidth;
+  SCENE_WIDTH  = scene.clientWidth;
   SCENE_HEIGHT = scene.clientHeight;
   applyDPR();
-  startX = SCENE_WIDTH / 2;
-  startY = SCENE_HEIGHT / 2;
-  robot.x = startX;
-  robot.y = startY;
+  startX   = SCENE_WIDTH  / 2;
+  startY   = SCENE_HEIGHT / 2;
+  robot.x  = startX;
+  robot.y  = startY;
   robot.dir = 0;
   visualRotation = 0;
   draw();
   updateRobot();
   renderSequence();
+  initSpeedControl();
 }
 
 /* =====================
-   RESIZE (ORIGINAL)
+   RESIZE
 ===================== */
 let resizeTimeout = null;
 
 window.addEventListener("resize", () => {
-
   if (!isResizing) {
     wasPlayingOnResize = (interval !== null || restartTimeout !== null);
     isResizing = true;
@@ -516,19 +551,19 @@ window.addEventListener("resize", () => {
   resizeTimeout = setTimeout(() => {
     isResizing = false;
 
-    SCENE_WIDTH = scene.clientWidth;
+    SCENE_WIDTH  = scene.clientWidth;
     SCENE_HEIGHT = scene.clientHeight;
     applyDPR();
 
-    startX = SCENE_WIDTH / 2;
+    startX = SCENE_WIDTH  / 2;
     startY = SCENE_HEIGHT / 2;
 
     const pos = calcPosition(loopCommands);
 
     robotImg.style.transition = "none";
-    robot.x = pos.x;
-    robot.y = pos.y;
-    robot.dir = pos.dir;
+    robot.x        = pos.x;
+    robot.y        = pos.y;
+    robot.dir      = pos.dir;
     visualRotation = pos.rot;
 
     draw();
@@ -539,15 +574,14 @@ window.addEventListener("resize", () => {
 
     if (wasPlayingOnResize) {
       wasPlayingOnResize = false;
-      isPaused = false;
-      interval = setInterval(execute, 500);
+      isPaused  = false;
+      interval  = setInterval(execute, getInterval());
     }
-
   }, 200);
 });
 
 /* =====================
-   BOTÓN HOME (ORIGINAL)
+   BOTÓN HOME
 ===================== */
 const homeBtn = document.getElementById("homeButton");
 if (homeBtn) {
@@ -559,6 +593,6 @@ if (homeBtn) {
 }
 
 /* =====================
-   INIT (ORIGINAL)
+   INIT
 ===================== */
 initScene();

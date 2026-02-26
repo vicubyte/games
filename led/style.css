@@ -33,6 +33,7 @@ body {
     background: var(--bg-primary);
     color: var(--text-primary);
     height: 100vh;
+    height: 100dvh; /* ✅ FIX: descuenta la barra de navegación del sistema en móvil */
     overflow: hidden;
 }
 
@@ -42,6 +43,7 @@ body {
 .app-container {
     width: 100%;
     height: 100vh;
+    height: 100dvh; /* ✅ FIX: mismo fix aquí */
     display: flex;
     flex-direction: column;
     background: var(--bg-white);
@@ -239,6 +241,7 @@ body {
     position: relative;
     width: min(90%, 600px);
     max-height: calc(100vh - 300px);
+    max-height: calc(100dvh - 300px); /* ✅ FIX: consistente con dvh */
     aspect-ratio: 1042 / 336;
     margin: 0 auto;
     user-select: none;
@@ -320,6 +323,7 @@ body {
     border-top: 2px solid var(--border-color);
     min-height: 180px;
     max-height: min(30vh, 260px);
+    max-height: min(30dvh, 260px); /* ✅ FIX: consistente con dvh */
 }
 
 .mobile-top-bar {
@@ -629,6 +633,7 @@ body {
     .cyberpi-container {
         width: min(78%, 480px);
         max-height: calc(100vh - 220px);
+        max-height: calc(100dvh - 220px);
     }
 
     .bottom-section { min-height: 150px; max-height: 160px; }
@@ -851,6 +856,7 @@ body {
     .cyberpi-container {
         width: min(65%, 380px);
         max-height: calc(100vh - 180px);
+        max-height: calc(100dvh - 180px);
     }
 
     .bottom-section {

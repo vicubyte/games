@@ -17,7 +17,7 @@
         <!-- Main Content (sección 1) -->
         <div class="main-content">
 
-            <!-- LEFT SIDEBAR: Home + Edit + Clear (desktop y landscape) -->
+            <!-- LEFT SIDEBAR: Home + Edit + Clear (solo Modo A ≥768px) -->
             <div class="sidebar-left">
                 <button class="btn-home" id="homeButton" title="Home">
                     <i class="fa-solid fa-house"></i>
@@ -46,7 +46,7 @@
                 </div>
             </div>
 
-            <!-- RIGHT SIDEBAR: Color Palette -->
+            <!-- RIGHT SIDEBAR: Color Palette (solo Modo A ≥768px) -->
             <div class="sidebar-right">
                 <div class="color-palette">
                     <button class="color-preset" data-color="#9E9E9E" style="background:#9E9E9E" title="Off"></button>
@@ -57,27 +57,27 @@
                     <button class="color-preset" data-color="#4DD0E1" style="background:#4DD0E1" title="Cyan"></button>
                     <button class="color-preset" data-color="#2196F3" style="background:#2196F3" title="Blue"></button>
                     <button class="color-preset" data-color="#9C27B0" style="background:#9C27B0" title="Purple"></button>
-                    <button class="color-preset custom-color-btn" id="customColorBtn" title="Custom color">
+                    <!-- Círculo editar: abre el picker -->
+                    <label class="color-preset custom-color-edit-btn" for="colorPicker" title="Edit custom color">
+                        <i class="fa-solid fa-palette"></i>
+                    </label>
+                    <!-- Círculo color actual: selecciona el color personalizado -->
+                    <button class="color-preset custom-color-select-btn" id="customColorSelectBtn" title="Select custom color">
                         <div class="custom-color-display"></div>
-                        <i class="fa-solid fa-palette custom-color-icon"></i>
-                        <div class="edit-custom-color" id="editCustomColor" title="Edit color">
-                            <i class="fa-solid fa-pen"></i>
-                        </div>
                     </button>
                 </div>
-                <input type="color" id="colorPicker" value="#F44336">
             </div>
         </div><!-- /main-content -->
 
         <!-- Bottom Section (sección 2) -->
         <div class="bottom-section">
 
-            <!-- Botón Home móvil: esquina superior IZQUIERDA -->
+            <!-- Botón Home móvil: esquina superior IZQUIERDA (solo Modo B <768px) -->
             <button class="btn-home-mobile" id="homeButtonMobile" title="Home">
                 <i class="fa-solid fa-house"></i>
             </button>
 
-            <!-- Edit + Clear móvil: esquina superior DERECHA -->
+            <!-- Edit + Clear móvil: esquina superior DERECHA (solo Modo B <768px) -->
             <div class="mobile-top-bar">
                 <button class="tool-btn-mobile" id="editBtnMobile" title="Edit">
                     <i class="fa-solid fa-pen-to-square"></i>
@@ -87,7 +87,7 @@
                 </button>
             </div>
 
-            <!-- Color Palette Mobile (horizontal) -->
+            <!-- Color Palette horizontal (solo Modo B <768px) -->
             <div class="color-palette-mobile">
                 <button class="color-preset-mobile" data-color="#9E9E9E" style="background:#9E9E9E" title="Off"></button>
                 <button class="color-preset-mobile selected" data-color="#F44336" style="background:#F44336" title="Red"></button>
@@ -97,40 +97,46 @@
                 <button class="color-preset-mobile" data-color="#4DD0E1" style="background:#4DD0E1" title="Cyan"></button>
                 <button class="color-preset-mobile" data-color="#2196F3" style="background:#2196F3" title="Blue"></button>
                 <button class="color-preset-mobile" data-color="#9C27B0" style="background:#9C27B0" title="Purple"></button>
-                <button class="color-preset-mobile custom-color-btn-mobile" id="customColorBtnMobile" title="Custom">
+                <!-- Círculo editar: abre el picker -->
+                <label class="color-preset-mobile custom-color-edit-btn-mobile" for="colorPicker" title="Edit custom color">
+                    <i class="fa-solid fa-palette"></i>
+                </label>
+                <!-- Círculo color actual: selecciona el color personalizado -->
+                <button class="color-preset-mobile custom-color-select-btn-mobile" id="customColorSelectBtnMobile" title="Select custom color">
                     <div class="custom-color-display-mobile"></div>
-                    <i class="fa-solid fa-palette custom-color-icon-mobile"></i>
                 </button>
             </div>
 
-            <!-- ⭐ Timeline REESTRUCTURADO:
-                 Desktop/Landscape: ◀ [estados] ▶ ⏰ ▶▶
-                 Mobile Vertical:   
-                   Fila 1: ◀ [estados scroll] ▶
-                   Fila 2:            ⏰ ▶▶
+            <!-- Timeline
+                 Modo A (≥768px): ◀ [estados] ▶  ⏰ ▶▶
+                 Modo B (<768px):
+                   Fila 1: [estados scroll]
+                   Fila 2: ◀ ▶ ⏰ ▶▶ alineados a la derecha
             -->
             <div class="timeline-section">
-                <!-- Wrapper para navegación de estados (solo agrupa en mobile) -->
-                <div class="timeline-nav-wrapper">
+
+                <!-- Fila 1 (Modo B) / inline (Modo A): solo estados -->
+                <div class="states-timeline" id="statesTimeline"></div>
+
+                <!-- Fila 2 (Modo B) / inline (Modo A): flechas + reloj + play -->
+                <div class="timeline-bottom-row">
                     <button class="timeline-nav" id="prevState" title="Previous">
                         <i class="fa-solid fa-chevron-left"></i>
                     </button>
-                    <div class="states-timeline" id="statesTimeline"></div>
                     <button class="timeline-nav" id="nextState" title="Next">
                         <i class="fa-solid fa-chevron-right"></i>
                     </button>
+                    <div class="timeline-controls">
+                        <button class="time-all-btn" id="timeAllBtn" title="Apply time to all">
+                            <i class="fa-solid fa-clock"></i>
+                        </button>
+                        <button class="play-btn" id="playBtn">
+                            <i class="fa-solid fa-play" id="playIcon"></i>
+                            <i class="fa-solid fa-pause" id="pauseIcon" style="display:none;"></i>
+                        </button>
+                    </div>
                 </div>
 
-                <!-- Controles de tiempo/playback -->
-                <div class="timeline-controls">
-                    <button class="time-all-btn" id="timeAllBtn" title="Apply time to all">
-                        <i class="fa-solid fa-clock"></i>
-                    </button>
-                    <button class="play-btn" id="playBtn">
-                        <i class="fa-solid fa-play" id="playIcon"></i>
-                        <i class="fa-solid fa-pause" id="pauseIcon" style="display:none;"></i>
-                    </button>
-                </div>
             </div>
         </div><!-- /bottom-section -->
 
@@ -151,6 +157,9 @@
         </div>
     </div>
 
+     <!-- Color picker global: fuera de cualquier sidebar para que siempre esté activo -->
+    <input type="color" id="colorPicker" value="#F44336">
+    
     <script src="script.js"></script>
 </body>
 </html>

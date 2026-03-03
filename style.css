@@ -1,634 +1,283 @@
-/* ============================================================
-   RESET + BASE
-============================================================ */
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-    --bg-main: #f5f7fa;
-    --bg-white: #ffffff;
-    --primary-blue:   #4FC3F7;
-    --primary-purple: #9C27B0;
-    --primary-green:  #66BB6A;
-    --text-primary:   #2c3e50;
-    --text-secondary: #6c757d;
-    --text-light:     #95a5a6;
-    --shadow-sm:    0 2px 8px rgba(0,0,0,.08);
-    --shadow-md:    0 4px 16px rgba(0,0,0,.10);
-    --shadow-hover: 0 8px 24px rgba(0,0,0,.12);
-    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    --font-family: 'Inter', sans-serif;
+    --blue:        #4FC3F7;
+    --purple:      #9C27B0;
+    --green:       #66BB6A;
+    --blue-d:      #0288D1;
+    --purple-d:    #6A1B9A;
+    --green-d:     #388E3C;
+    --bg:          #f0f4f8;
+    --card-bg:     #ffffff;
+    --text-main:   #1e2a35;
+    --text-sub:    #5a6a7a;
+    --text-light:  #9aaab8;
+    --r-card:      20px;
+    --r-icon:      16px;
+    --shadow:      0 4px 20px rgba(0,0,0,.06);
+    --shadow-h:    0 12px 30px rgba(0,0,0,.12);
+    --ease:        cubic-bezier(0.4, 0, 0.2, 1);
+    --t:           0.26s;
 }
 
 html, body {
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100vh;
     overflow: hidden;
-    font-family: var(--font-family);
-    background: var(--bg-main);
-    color: var(--text-primary);
+    background: var(--bg);
+    color: var(--text-main);
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
 }
 
-/* ============================================================
-   CONTAINER
-============================================================ */
+/*
+   LAYOUT:
+   - header: 20vh exacto (= 1/5 pantalla), sin padding top
+   - programs-section: flex:1 (ocupa el resto)
+   - footer: tamaño natural
+*/
 .container {
-    width: 100%;
-    height: 100%;
+    width: 100%; height: 100vh;
     display: flex;
     flex-direction: column;
-    padding: clamp(16px, 2.5vh, 32px) clamp(20px, 3vw, 48px);
-    gap: clamp(20px, 3vh, 40px);
+    padding: 0 clamp(20px, 5vw, 60px);
     overflow: hidden;
 }
 
-/* ============================================================
-   HEADER — Logo 1/3 de pantalla en desktop/landscape
-============================================================ */
+/* ── HEADER: 20vh = 1/5 de pantalla exacto
+   El logo queda centrado vertical y horizontalmente dentro ── */
 .header {
-    text-align: center;
     flex-shrink: 0;
-    padding: clamp(12px, 2vh, 28px) 0;
+    height: 20vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeUp 0.42s var(--ease) both;
 }
 
 .logo-container {
+    height: 100%;       /* hereda 20vh del header */
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-/* ÚNICO CAMBIO respecto al original:
-   width: auto  →  mantiene proporción de la imagen
-   object-fit: contain  →  nunca distorsiona aunque max-width la limite */
+/* height: 100% = 100% de logo-container = 20vh = 1/5 pantalla */
 .logo-image {
-    height: clamp(80px, 20vh, 220px);
+    height: 100%;
     width: auto;
     max-width: 90vw;
     object-fit: contain;
-    object-position: center;
-    filter: drop-shadow(0 4px 16px rgba(0,0,0,.12));
-    transition: transform var(--transition);
+    filter: drop-shadow(0 4px 10px rgba(0,0,0,.08));
+    transition: transform var(--t) var(--ease);
 }
+.logo-image:hover { transform: scale(1.03); }
 
-.logo-image:hover {
-    transform: scale(1.03);
-}
-
-.logo-image.error {
-    display: none;
-}
-
-.logo-fallback {
-    font-size: clamp(3rem, 12vh, 6rem);
-    font-weight: 800;
-    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--primary-purple) 50%, var(--primary-green) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    letter-spacing: -0.02em;
-    line-height: 1.1;
-    display: block;
-}
-
-/* ============================================================
-   PROGRAMS SECTION
-============================================================ */
+/* ── Programs section: ocupa el espacio restante (80vh menos footer) ── */
 .programs-section {
     flex: 1;
-    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;
     min-height: 0;
-    overflow: visible;
-    padding: clamp(8px, 1vh, 16px) 0;
+    padding: clamp(8px, 1.5vh, 20px) 0;
 }
 
-/* ============================================================
-   GRID — 3 columnas en desktop, adaptativo en narrow
-============================================================ */
 .programs-grid {
     display: grid;
     width: 100%;
     max-width: 1200px;
+    max-height: 520px;
     grid-template-columns: repeat(3, 1fr);
-    gap: clamp(16px, 2.5vw, 32px);
-    align-items: stretch;
+    gap: clamp(15px, 2vw, 30px);
 }
 
-/* ============================================================
-   CARD — Compacto con mejor densidad
-============================================================ */
+/* ── Tarjeta desktop/landscape
+   padding-bottom amplio = la flecha absolute nunca toca el texto ── */
 .program-card {
-    background: var(--bg-white);
-    border-radius: 20px;
-    border: 2px solid rgba(0,0,0,.06);
-    box-shadow: var(--shadow-md);
-    overflow: visible;
+    background: var(--card-bg);
+    border-radius: var(--r-card);
+    border: 2px solid rgba(0,0,0,.04);
+    box-shadow: var(--shadow);
     cursor: pointer;
-    transition: all var(--transition);
     position: relative;
-    
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    text-align: center;
-    padding: clamp(20px, 3vh, 36px) clamp(16px, 2.5vw, 32px);
-    gap: clamp(10px, 1.5vh, 16px);
-    aspect-ratio: 1 / 0.85;
+    padding: clamp(20px, 4vh, 40px) 20px clamp(44px, 6.5vh, 60px);
+    transition: all var(--t) var(--ease);
+    animation: fadeUp 0.48s var(--ease) both;
 }
 
-.program-card::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(135deg, transparent 0%, rgba(0,0,0,.02) 100%);
-    opacity: 0;
-    transition: opacity var(--transition);
-    border-radius: inherit;
-}
+.program-card:hover { transform: translateY(-8px); box-shadow: var(--shadow-h); }
+.program-card:nth-child(1):hover { border-color: var(--blue); }
+.program-card:nth-child(2):hover { border-color: var(--purple); }
+.program-card:nth-child(3):hover { border-color: var(--green); }
 
-.program-card:hover::before {
-    opacity: 1;
-}
-
-.program-card:hover {
-    transform: translateY(-4px) scale(1.015);
-    box-shadow: var(--shadow-hover);
-    border-color: rgba(0,0,0,.1);
-    z-index: 10;
-}
-
-.program-card:nth-child(1):hover { border-color: var(--primary-blue); }
-.program-card:nth-child(2):hover { border-color: var(--primary-purple); }
-.program-card:nth-child(3):hover { border-color: var(--primary-green); }
-
-.program-card:active {
-    transform: translateY(-2px) scale(1.005);
-}
-
-/* Badge */
 .program-number {
     position: absolute;
-    top: 14px;
-    left: 14px;
-    width: 40px;
-    height: 40px;
+    top: 15px; left: 15px;
+    width: clamp(24px, 5vh, 30px);
+    height: clamp(24px, 5vh, 30px);
     border-radius: 50%;
-    color: white;
-    font-size: 1.1rem;
-    font-weight: 700;
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 800;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 3px 12px rgba(0,0,0,.2);
-    transition: transform var(--transition);
-    z-index: 2;
+    box-shadow: 0 2px 5px rgba(0,0,0,.15);
 }
+.program-card:nth-child(1) .program-number { background: linear-gradient(135deg, var(--blue), var(--blue-d)); }
+.program-card:nth-child(2) .program-number { background: linear-gradient(135deg, var(--purple), var(--purple-d)); }
+.program-card:nth-child(3) .program-number { background: linear-gradient(135deg, var(--green), var(--green-d)); }
 
-.program-card:nth-child(1) .program-number {
-    background: linear-gradient(135deg, #4FC3F7 0%, #0288D1 100%);
-}
-.program-card:nth-child(2) .program-number {
-    background: linear-gradient(135deg, #9C27B0 0%, #6A1B9A 100%);
-}
-.program-card:nth-child(3) .program-number {
-    background: linear-gradient(135deg, #66BB6A 0%, #388E3C 100%);
-}
-
-.program-card:hover .program-number {
-    transform: scale(1.12) rotate(8deg);
-}
-
-/* Content */
 .program-content {
-    padding-top: 32px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: clamp(10px, 1.5vh, 14px);
+    gap: 1.5vh;
     width: 100%;
-    z-index: 1;
 }
 
-/* Icon */
 .program-icon {
-    width: clamp(52px, 8vh, 72px);
-    height: clamp(52px, 8vh, 72px);
+    width: clamp(60px, 10vh, 85px);
+    height: clamp(60px, 10vh, 85px);
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, rgba(79,195,247,.12), rgba(156,39,176,.12));
-    border-radius: 16px;
-    flex-shrink: 0;
-    transition: all var(--transition);
+    border-radius: var(--r-icon);
 }
+.program-card:nth-child(1) .program-icon { background: rgba(79,195,247,.12); }
+.program-card:nth-child(2) .program-icon { background: rgba(156,39,176,.10); }
+.program-card:nth-child(3) .program-icon { background: rgba(102,187,106,.12); }
 
-.program-card:hover .program-icon {
-    transform: scale(1.08) rotate(-3deg);
-}
+.program-icon i { font-size: clamp(26px, 4.5vh, 38px); transition: transform var(--t); }
+.program-card:hover .program-icon i { transform: scale(1.1) rotate(-5deg); }
+.program-card:nth-child(1) .program-icon i { color: var(--blue); }
+.program-card:nth-child(2) .program-icon i { color: var(--purple); }
+.program-card:nth-child(3) .program-icon i { color: var(--green); }
 
-.program-icon i {
-    font-size: clamp(26px, 4vh, 38px);
-    transition: all var(--transition);
-}
-
-.program-card:nth-child(1) .program-icon i { color: var(--primary-blue); }
-.program-card:nth-child(2) .program-icon i { color: var(--primary-purple); }
-.program-card:nth-child(3) .program-icon i { color: var(--primary-green); }
-
-/* Info container */
 .program-info {
     display: flex;
     flex-direction: column;
-    gap: clamp(6px, 1vh, 10px);
+    align-items: center;
+    text-align: center;
+    gap: 4px;
     width: 100%;
 }
 
-/* Title */
 .program-title {
-    font-size: clamp(1.1rem, 2.2vh, 1.5rem);
-    font-weight: 700;
-    line-height: 1.2;
-    transition: color var(--transition);
-    letter-spacing: -0.01em;
+    font-size: clamp(1rem, 2.2vh, 1.4rem);
+    font-weight: 800;
+    color: var(--text-main);
 }
 
-.program-card:nth-child(1):hover .program-title { color: var(--primary-blue); }
-.program-card:nth-child(2):hover .program-title { color: var(--primary-purple); }
-.program-card:nth-child(3):hover .program-title { color: var(--primary-green); }
-
-/* Description */
 .program-description {
-    font-size: clamp(0.85rem, 1.6vh, 1rem);
-    color: var(--text-secondary);
-    line-height: 1.5;
-    max-width: 92%;
-    margin: 0 auto;
+    font-size: clamp(0.75rem, 1.5vh, 0.9rem);
+    color: var(--text-sub);
+    line-height: 1.4;
 }
 
-/* Arrow */
+/* Flecha siempre debajo del texto gracias al padding-bottom de la tarjeta */
 .program-arrow {
     position: absolute;
-    bottom: 12px;
-    right: 12px;
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    background: rgba(0,0,0,.04);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: all var(--transition);
-    box-shadow: 0 2px 8px rgba(0,0,0,.1);
+    bottom: 14px; right: 14px;
+    opacity: 0.2;
+    transition: all var(--t);
 }
+.program-card:hover .program-arrow { opacity: 1; transform: translateX(3px); }
 
-.program-card:hover .program-arrow {
-    opacity: 1;
-    transform: translateX(3px);
-}
-
-.program-card:nth-child(1):hover .program-arrow { background: var(--primary-blue); }
-.program-card:nth-child(2):hover .program-arrow { background: var(--primary-purple); }
-.program-card:nth-child(3):hover .program-arrow { background: var(--primary-green); }
-
-.program-arrow svg {
-    width: 20px;
-    height: 20px;
-    color: var(--text-secondary);
-    transition: color var(--transition);
-}
-
-.program-card:hover .program-arrow svg {
-    color: white;
-}
-
-/* ============================================================
-   FOOTER
-============================================================ */
+/* ── Footer ── */
 .footer {
     flex-shrink: 0;
-    color: var(--text-light);
-    font-size: clamp(0.8rem, 1.6vh, 1rem);
     text-align: center;
-    padding: clamp(8px, 1.2vh, 16px) 0;
-    opacity: 0.7;
+    font-size: 0.75rem;
+    color: var(--text-light);
+    padding: clamp(6px, 1vh, 14px) 0;
+}
+
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(15px); }
+    to   { opacity: 1; transform: translateY(0); }
 }
 
 /* ============================================================
-   WEB ANGOSTA (< 768px)
+   MÓVIL / PORTRAIT  ≤ 768px
 ============================================================ */
 @media (max-width: 768px) {
-    .logo-image {
-        height: clamp(60px, 10vh, 100px);
-    }
-
-    .logo-fallback {
-        font-size: clamp(2rem, 7vh, 3.5rem);
-    }
+    .container { padding: 0 clamp(12px, 3vw, 24px); }
+    .header { height: 20vh; }
 
     .programs-grid {
         grid-template-columns: 1fr;
-        grid-template-rows: repeat(3, 1fr);
-        gap: clamp(12px, 2vh, 20px);
+        max-height: none;
+        gap: 12px;
     }
 
+    /* Tarjeta horizontal — padding uniforme, flecha en flujo */
     .program-card {
         flex-direction: row;
-        text-align: left;
         justify-content: flex-start;
-        padding: clamp(14px, 2.5vh, 24px) clamp(16px, 3.5vw, 28px);
-        gap: clamp(12px, 2.5vw, 20px);
-        aspect-ratio: unset;
+        align-items: center;
+        padding: 14px 18px;
+        gap: 14px;
     }
 
-    .program-number {
-        position: relative;
-        top: unset;
-        left: unset;
-        flex-shrink: 0;
-        width: clamp(42px, 9vw, 58px);
-        height: clamp(42px, 9vw, 58px);
-        font-size: clamp(1.05rem, 3.5vw, 1.65rem);
-    }
+    .program-number { display: none; }
 
     .program-content {
-        padding-top: 0;
         flex-direction: row;
         align-items: center;
-        gap: clamp(12px, 3vw, 20px);
+        gap: 14px;
         flex: 1;
+        min-width: 0;
     }
 
-    .program-icon {
-        width: clamp(50px, 10vw, 70px);
-        height: clamp(50px, 10vw, 70px);
-        flex-shrink: 0;
-    }
-
-    .program-icon i {
-        font-size: clamp(24px, 5vw, 38px);
-    }
+    .program-icon { width: 52px; height: 52px; flex-shrink: 0; }
 
     .program-info {
-        gap: clamp(4px, 1vh, 8px);
         flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        text-align: left;
+        min-width: 0;
+        gap: 3px;
     }
 
     .program-title {
-        font-size: clamp(1.05rem, 3.8vw, 1.65rem);
+        font-size: 1.05rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .program-description {
-        font-size: clamp(0.8rem, 2.5vw, 1.1rem);
-        max-width: 100%;
+        display: block;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
+    /* Flecha en flujo normal: imposible que tape el texto */
     .program-arrow {
-        position: relative;
-        bottom: unset;
-        right: unset;
-        opacity: 1;
+        position: static;
+        bottom: unset; right: unset;
+        opacity: 0.35;
         flex-shrink: 0;
-        width: clamp(34px, 7vw, 46px);
-        height: clamp(34px, 7vw, 46px);
+        margin-left: auto;
     }
-
     .program-card:hover .program-arrow {
-        transform: translateX(2px);
-    }
-}
-
-/* ============================================================
-   PORTRAIT — Mobile vertical
-============================================================ */
-@media (orientation: portrait) {
-    .container {
-        padding: clamp(16px, 2.5vh, 36px) clamp(16px, 3.5vw, 40px);
-        gap: clamp(20px, 3.5vh, 44px);
-    }
-
-    .header {
-        padding: clamp(12px, 2.5vh, 32px) 0;
-    }
-
-    .logo-image {
-        height: clamp(70px, 12vh, 120px);
-    }
-
-    .logo-fallback {
-        font-size: clamp(2.2rem, 8vh, 4.5rem);
-    }
-
-    @media (max-width: 400px) {
-        .programs-grid {
-            gap: clamp(10px, 1.8vh, 18px);
-        }
-
-        .program-card {
-            padding: clamp(12px, 2.2vh, 22px) clamp(14px, 3.2vw, 26px);
-            gap: clamp(10px, 2.2vw, 18px);
-        }
-
-        .program-number {
-            width: clamp(40px, 8.5vw, 56px);
-            height: clamp(40px, 8.5vw, 56px);
-            font-size: clamp(1rem, 3.3vw, 1.6rem);
-        }
-
-        .program-icon {
-            width: clamp(48px, 9.5vw, 68px);
-            height: clamp(48px, 9.5vw, 68px);
-        }
-
-        .program-icon i {
-            font-size: clamp(22px, 4.8vw, 36px);
-        }
-
-        .program-title {
-            font-size: clamp(1rem, 3.6vw, 1.6rem);
-        }
-
-        .program-description {
-            font-size: clamp(0.78rem, 2.4vw, 1.08rem);
-        }
-
-        .program-arrow {
-            width: clamp(32px, 6.8vw, 44px);
-            height: clamp(32px, 6.8vw, 44px);
-        }
-    }
-
-    @media (min-width: 401px) and (max-width: 600px) {
-        .programs-grid {
-            gap: clamp(12px, 2.2vh, 22px);
-        }
-
-        .program-card {
-            padding: clamp(16px, 2.8vh, 26px) clamp(18px, 3.8vw, 30px);
-            gap: clamp(12px, 2.8vw, 20px);
-        }
-
-        .program-number {
-            width: clamp(44px, 7.5vw, 60px);
-            height: clamp(44px, 7.5vw, 60px);
-            font-size: clamp(1.1rem, 2.8vw, 1.7rem);
-        }
-
-        .program-icon {
-            width: clamp(56px, 8.5vw, 76px);
-            height: clamp(56px, 8.5vw, 76px);
-        }
-
-        .program-icon i {
-            font-size: clamp(26px, 4.2vw, 40px);
-        }
-
-        .program-title {
-            font-size: clamp(1.15rem, 3vw, 1.7rem);
-        }
-
-        .program-description {
-            font-size: clamp(0.82rem, 2.1vw, 1.12rem);
-        }
-
-        .program-arrow {
-            width: clamp(36px, 6.2vw, 48px);
-            height: clamp(36px, 6.2vw, 48px);
-        }
-    }
-
-    @media (min-width: 601px) {
-        .programs-grid {
-            gap: clamp(16px, 2.8vh, 30px);
-            max-width: 700px;
-            margin: 0 auto;
-        }
-
-        .program-card {
-            padding: clamp(20px, 3.2vh, 36px);
-        }
-    }
-}
-
-/* ============================================================
-   LANDSCAPE BAJO — optimización extrema
-============================================================ */
-@media (orientation: landscape) and (max-height: 550px) {
-    .container {
-        padding: clamp(10px, 1.5vh, 16px) clamp(16px, 2.5vw, 32px);
-        gap: clamp(8px, 1.2vh, 14px);
-    }
-
-    .header {
-        padding: clamp(6px, 1vh, 12px) 0;
-    }
-
-    .logo-image {
-        height: clamp(70px, 25vh, 140px);
-    }
-
-    .logo-fallback {
-        font-size: clamp(1.8rem, 8vh, 4rem);
-    }
-
-    .programs-grid {
-        gap: clamp(12px, 2vw, 20px);
-    }
-
-    .program-card {
-        padding: clamp(12px, 2.5vh, 20px) clamp(12px, 2vw, 18px);
-        gap: clamp(6px, 1vh, 10px);
-    }
-
-    .program-number {
-        width: 34px;
-        height: 34px;
-        font-size: 0.95rem;
-        top: 10px;
-        left: 10px;
-    }
-
-    .program-content {
-        padding-top: 26px;
-        gap: clamp(6px, 1vh, 10px);
-    }
-
-    .program-icon {
-        width: clamp(40px, 7vh, 60px);
-        height: clamp(40px, 7vh, 60px);
-    }
-
-    .program-icon i {
-        font-size: clamp(20px, 3.5vh, 32px);
-    }
-
-    .program-info {
-        gap: clamp(4px, 0.8vh, 7px);
-    }
-
-    .program-title {
-        font-size: clamp(0.9rem, 2vh, 1.3rem);
-    }
-
-    .program-description {
-        font-size: clamp(0.7rem, 1.4vh, 0.92rem);
-    }
-
-    .program-arrow {
-        width: 28px;
-        height: 28px;
-    }
-
-    .footer {
-        font-size: clamp(0.7rem, 1.4vh, 0.88rem);
-        padding: clamp(4px, 0.8vh, 10px) 0;
-    }
-}
-
-/* ============================================================
-   ANIMACIONES
-============================================================ */
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(25px);
-    }
-    to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateX(3px);
     }
 }
 
-.program-card {
-    animation: fadeInUp 0.6s ease-out backwards;
-}
-
-.program-card:nth-child(1) { animation-delay: 0.1s; }
-.program-card:nth-child(2) { animation-delay: 0.2s; }
-.program-card:nth-child(3) { animation-delay: 0.3s; }
-
-.header {
-    animation: fadeInUp 0.5s ease-out backwards;
-}
-
-/* Loading state */
-.program-card.loading {
-    opacity: 0.6;
-    pointer-events: none;
-}
-
-.program-card.loading::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,.5), transparent);
-    animation: shimmer 1.5s infinite;
-    border-radius: inherit;
-}
-
-@keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
+/* ── Landscape compacto ── */
+@media (max-height: 500px) and (orientation: landscape) {
+    .header { height: 20vh; }
+    .program-card { padding: 10px 14px clamp(38px, 5.5vh, 50px); }
 }

@@ -45,30 +45,18 @@ function initializeHomeButton() {
 //  COLOR PALETTE — DESKTOP
 // ───────────────────────────────────────
 function initializeColorPalette() {
-    document.querySelectorAll('.sidebar-right .color-preset:not(.custom-color-btn)')
+    document.querySelectorAll('.sidebar-right .color-preset:not(.custom-color-edit-btn):not(.custom-color-select-btn)')
         .forEach(btn => btn.addEventListener('click', () => selectColor(btn.dataset.color)));
-
-    const customBtn = document.getElementById('customColorBtn');
-    if (customBtn) {
-        // Clic simple en desktop: selecciona color (si no viene del lápiz)
-        customBtn.addEventListener('click', e => {
-            if (!e.target.closest('.edit-custom-color')) selectColor(state.customColor);
-        });
-    }
 
     updateCustomColorDisplay();
 }
 
 // ───────────────────────────────────────
 //  COLOR PALETTE — MOBILE
-//  Solo los colores fijos; el custom lo maneja initializeCustomColorPicker
 // ───────────────────────────────────────
 function initializeColorPaletteMobile() {
-    document.querySelectorAll('.color-palette-mobile .color-preset-mobile:not(.custom-color-btn-mobile)')
+    document.querySelectorAll('.color-palette-mobile .color-preset-mobile:not(.custom-color-edit-btn-mobile):not(.custom-color-select-btn-mobile)')
         .forEach(btn => btn.addEventListener('click', () => selectColor(btn.dataset.color)));
-
-    // ← El botón customColorBtnMobile ya no se gestiona aquí,
-    //   sino en initializeCustomColorPicker() para unificar la lógica.
 }
 
 // ───────────────────────────────────────
@@ -84,116 +72,60 @@ function selectColor(color) {
     ).forEach(el => el.classList.add('selected'));
 
     if (color === state.customColor) {
-        document.querySelectorAll('.custom-color-btn, .custom-color-btn-mobile')
+        document.querySelectorAll('.custom-color-select-btn, .custom-color-select-btn-mobile')
             .forEach(el => el.classList.add('selected'));
     }
 }
 
 function updateCustomColorDisplay() {
-    document.querySelectorAll('.custom-color-display, .custom-color-display-mobile')
-        .forEach(el => { el.style.background = state.customColor; });
+    const displays = document.querySelectorAll('.custom-color-display, .custom-color-display-mobile');
+    displays.forEach(el => { el.style.background = state.customColor; });
 }
 
 // ───────────────────────────────────────
 //  CUSTOM COLOR PICKER
 //
-//  Desktop:
-//    - Clic simple en círculo  → selecciona color
-//    - Hover muestra lápiz → clic en lápiz → abre picker
-//
-//  Móvil / táctil:
-//    - 1 toque en círculo      → selecciona color personalizado
-//    - 2 toques rápidos (≤350ms) → abre el picker para editar
+//  Dos círculos separados (desktop + mobile):
+//    - Círculo paleta (editar)   → abre el picker
+//    - Círculo color actual      → selecciona el color personalizado
 // ───────────────────────────────────────
 function initializeCustomColorPicker() {
-    const picker    = document.getElementById('colorPicker');
-    const editBtn   = document.getElementById('editCustomColor');
-    const customBtn = document.getElementById('customColorBtn');
+    const picker = document.getElementById('colorPicker');
 
-    // ── Desktop: lápiz abre picker ──
-    if (editBtn) {
-        editBtn.addEventListener('click', e => {
-            e.stopPropagation();
-            openColorPicker(customBtn);
-        });
+    const selectBtnDesktop = document.getElementById('customColorSelectBtn');
+    const selectBtnMobile  = document.getElementById('customColorSelectBtnMobile');
+
+    if (selectBtnDesktop) {
+        selectBtnDesktop.addEventListener('click', () => selectColor(state.customColor));
+    }
+    if (selectBtnMobile) {
+        selectBtnMobile.addEventListener('click', () => selectColor(state.customColor));
     }
 
-    // ── Desktop: doble clic en círculo también abre picker (bonus UX) ──
-    if (customBtn) {
-        customBtn.addEventListener('dblclick', e => {
-            e.preventDefault();
-            openColorPicker(customBtn);
-        });
-
-        // ── Táctil sobre botón desktop-custom: doble toque abre picker ──
-        let lastTouchDesktopCustom = 0;
-        customBtn.addEventListener('touchstart', e => {
-            const now = Date.now();
-            if (now - lastTouchDesktopCustom < 350) {
-                // Doble toque → abrir picker
-                e.preventDefault();
-                openColorPicker(customBtn);
-            } else {
-                // Primer toque → seleccionar color (se deja el click nativo actuar)
-            }
-            lastTouchDesktopCustom = now;
-        }, { passive: false });
-    }
-
-    // ── Móvil: botón custom mobile ──
-    const mobileCustom = document.getElementById('customColorBtnMobile');
-    if (mobileCustom) {
-        // Toque simple → seleccionar color personalizado
-        mobileCustom.addEventListener('click', () => {
-            selectColor(state.customColor);
-        });
-
-        // Doble clic (escritorio con vista mobile) → abre picker
-        mobileCustom.addEventListener('dblclick', e => {
-            e.preventDefault();
-            openColorPicker(mobileCustom);
-        });
-
-        // Doble toque táctil → abre picker
-        let lastTouchMobile = 0;
-        mobileCustom.addEventListener('touchstart', e => {
-            const now = Date.now();
-            if (now - lastTouchMobile < 350) {
-                // Doble toque detectado
-                e.preventDefault();
-                openColorPicker(mobileCustom);
-            }
-            // El primer toque deja que el evento 'click' seleccione el color
-            lastTouchMobile = now;
-        }, { passive: false });
-    }
-
-    // ── Picker: actualización en tiempo real mientras se arrastra ──
+    // Actualización en tiempo real
     picker.addEventListener('input', e => {
         state.customColor = e.target.value;
         updateCustomColorDisplay();
     });
 
-    // ── Picker: confirma color al cerrar ──
+    // Confirma color al cerrar
     picker.addEventListener('change', e => {
         state.customColor = e.target.value;
         updateCustomColorDisplay();
         selectColor(state.customColor);
-        // Mueve el picker fuera de pantalla
-        picker.style.left = '-9999px';
-        picker.style.top  = '-9999px';
-    });
-
-    // ── Picker: al perder foco lo esconde ──
-    picker.addEventListener('blur', () => {
-        setTimeout(() => {
-            picker.style.left = '-9999px';
-            picker.style.top  = '-9999px';
-        }, 150);
     });
 }
 
-// ── Abre el color picker nativo posicionado junto al botón de referencia ──
+// ── Oculta el picker fuera de pantalla ──
+function hidePicker() {
+    const picker = document.getElementById('colorPicker');
+    picker.style.left   = '-9999px';
+    picker.style.top    = '-9999px';
+    picker.style.width  = '1px';
+    picker.style.height = '1px';
+}
+
+// ── Abre el picker posicionado junto al botón ──
 function openColorPicker(referenceBtn) {
     const picker = document.getElementById('colorPicker');
     const rect   = referenceBtn.getBoundingClientRect();
@@ -203,15 +135,16 @@ function openColorPicker(referenceBtn) {
     let left = rect.left - 260;
     let top  = rect.top  - 80;
 
-    // Evita que se salga de la pantalla
     left = Math.max(10, Math.min(left, W - 270));
     top  = Math.max(10, Math.min(top,  H - 380));
 
-    picker.style.left    = left + 'px';
-    picker.style.top     = top  + 'px';
-    picker.style.width   = '1px';
-    picker.style.height  = '1px';
-    picker.style.opacity = '0';
+    picker.style.position = 'fixed';
+    picker.style.left     = left + 'px';
+    picker.style.top      = top  + 'px';
+    picker.style.width    = '1px';
+    picker.style.height   = '1px';
+    picker.style.opacity  = '0';
+    picker.style.zIndex   = '9999';
 
     picker.click();
 }

@@ -27,9 +27,6 @@
     <button class="control-btn play-btn" id="playBtn" title="Play">
       <i class="fa-solid fa-play"></i>
     </button>
-    <button class="control-btn pause-btn" id="stopBtn" title="Pause">
-      <i class="fa-solid fa-pause"></i>
-    </button>
     <button class="control-btn reset-btn" id="resetBtn" title="Reset">
       <i class="fa-solid fa-trash"></i>
     </button>
@@ -63,7 +60,6 @@
 
       <!-- Barra con 5 puntos -->
       <div class="speed-track" id="speedTrack">
-        <div class="speed-fill" id="speedFill"></div>
         <button class="speed-dot" data-step="5" title="Fastest"></button>
         <button class="speed-dot" data-step="4" title="Fast"></button>
         <button class="speed-dot" data-step="3" title="Medium"></button>
@@ -71,25 +67,24 @@
         <button class="speed-dot" data-step="1" title="Slowest"></button>
       </div>
 
-      <!-- Tortuga (lento) — SVG inline -->
+      <!-- Tortuga (lento) — perfil lateral -->
       <svg class="speed-icon speed-icon--slow" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" title="Slow">
-        <!-- caparazón -->
-        <ellipse cx="32" cy="32" rx="18" ry="13" fill="currentColor"/>
-        <!-- patrón caparazón -->
-        <ellipse cx="32" cy="30" rx="8" ry="6" fill="none" stroke="white" stroke-width="1.5"/>
-        <line x1="32" y1="24" x2="32" y2="36" stroke="white" stroke-width="1.2"/>
-        <line x1="24" y1="30" x2="40" y2="30" stroke="white" stroke-width="1.2"/>
+        <!-- caparazón (domo de perfil) -->
+        <ellipse cx="30" cy="34" rx="17" ry="12" fill="currentColor"/>
+        <!-- parte inferior plana -->
+        <rect x="13" y="40" width="34" height="4" rx="2" fill="currentColor"/>
         <!-- cabeza -->
-        <circle cx="49" cy="30" r="6" fill="currentColor"/>
+        <circle cx="50" cy="34" r="6" fill="currentColor"/>
+        <!-- cuello que conecta cabeza con caparazón -->
+        <rect x="44" y="31" width="8" height="6" fill="currentColor"/>
         <!-- ojo -->
-        <circle cx="51" cy="28" r="1.2" fill="white"/>
-        <!-- patas -->
-        <ellipse cx="20" cy="42" rx="5" ry="3" fill="currentColor" transform="rotate(-30 20 42)"/>
-        <ellipse cx="34" cy="44" rx="5" ry="3" fill="currentColor" transform="rotate(20 34 44)"/>
-        <ellipse cx="18" cy="22" rx="5" ry="3" fill="currentColor" transform="rotate(30 18 22)"/>
-        <ellipse cx="32" cy="20" rx="5" ry="3" fill="currentColor" transform="rotate(-20 32 20)"/>
+        <circle cx="53" cy="32" r="1.3" fill="white"/>
+        <!-- pata delantera -->
+        <ellipse cx="42" cy="46" rx="5" ry="3" fill="currentColor" transform="rotate(10 42 46)"/>
+        <!-- pata trasera -->
+        <ellipse cx="20" cy="46" rx="5" ry="3" fill="currentColor" transform="rotate(-10 20 46)"/>
         <!-- cola -->
-        <ellipse cx="15" cy="33" rx="5" ry="2.5" fill="currentColor" transform="rotate(10 15 33)"/>
+        <ellipse cx="13" cy="40" rx="4" ry="2" fill="currentColor" transform="rotate(20 13 40)"/>
       </svg>
 
     </div>

@@ -190,20 +190,6 @@ canvas {
   z-index: 0;
 }
 
-/* Línea azul de relleno */
-.speed-fill {
-  position: absolute;
-  top: 4px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: var(--track-width);
-  background: var(--primary-blue);
-  border-radius: 2px;
-  z-index: 1;
-  transition: height 0.2s ease;
-  height: 50%;
-}
-
 /* Puntos */
 .speed-dot {
   position: relative;
@@ -219,7 +205,7 @@ canvas {
   flex-shrink: 0;
 }
 .speed-dot:hover { border-color: var(--primary-blue); transform: scale(1.2); }
-.speed-dot--filled { border-color: var(--primary-blue); background: var(--primary-blue-light); }
+.speed-dot--filled { border-color: var(--border-color); background: var(--bg-white); }
 .speed-dot--active {
   border-color: var(--primary-blue);
   background: var(--primary-blue) !important;

@@ -14,8 +14,6 @@ canvas.height = window.innerHeight;
 
 /* =====================
    WHITE TRACK MODE
-   Cuando está activo: fondo blanco full pantalla, sin imagen.
-   trackBounds = pantalla completa, robot size basado en lado corto de pantalla.
 ===================== */
 let whiteTrack = false;
 
@@ -33,7 +31,6 @@ function updateTrackBounds() {
   const sh = window.innerHeight;
 
   if (whiteTrack) {
-    // Pista blanca = pantalla completa, sin bandas negras
     trackBounds  = { x: 0, y: 0, width: sw, height: sh };
     trackRotated = false;
   } else {
@@ -59,7 +56,6 @@ function updateTrackBounds() {
     };
   }
 
-  // Robot size = 1/7 del lado más corto de la pista renderizada
   const shortSide = Math.min(trackBounds.width, trackBounds.height);
   ROBOT_SIZE = Math.max(24, Math.round(shortSide / 7));
   robotImg.style.width  = ROBOT_SIZE + "px";
@@ -79,13 +75,11 @@ function drawTrack() {
   const { x, y, width, height } = trackBounds;
 
   if (whiteTrack) {
-    // Fondo blanco full pantalla
     ctx.fillStyle = "#fff";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     return;
   }
 
-  // Fondo negro + imagen
   ctx.fillStyle = "#000";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -136,9 +130,9 @@ function centerRobotOnTrack() {
 /* =====================
    MOVIMIENTO
 ===================== */
-const MAX_SPEED    = 1.5;
+const MAX_SPEED    = 1.5;/*1.5*/
 const TURN_SPEED   = 1.2;
-const ACCELERATION = 0.08;
+const ACCELERATION = 0.08;/*0.08*/
 const FRICTION     = 0.90;
 let velocity = 0;
 
@@ -167,15 +161,15 @@ document.addEventListener("keyup", e => {
 /* =====================
    REPRODUCCIÓN / PAUSA
 ===================== */
-let recording         = false;
-let recordedPath      = [];
-let playing           = false;
-let paused            = false;
-let pausedElapsed     = 0;
-let playbackStartTime = 0;
+let recording          = false;
+let recordedPath       = [];
+let playing            = false;
+let paused             = false;
+let pausedElapsed      = 0;
+let playbackStartTime  = 0;
 let recordingStartTime = 0;
-let playbackTimeout   = null;
-let lastFrameIndex    = 0;
+let playbackTimeout    = null;
+let lastFrameIndex     = 0;
 
 /* =====================
    DPAD
@@ -200,87 +194,108 @@ Object.keys(dpadMap).forEach(id => {
 });
 
 /* =====================
-   GRABACIÓN
+   BOTÓN REC / SAVE
+   Estado inicial : REC  → ícono circle rojo  , clase rec-btn
+   Al grabar      : SAVE → ícono floppy verde , clase save-btn
 ===================== */
-const recBtn             = document.getElementById("recBtn");
-const saveBtn            = document.getElementById("saveBtn");
+const recSaveBtn         = document.getElementById("recSaveBtn");
 const recordingIndicator = document.getElementById("recordingIndicator");
 const statusIndicator    = document.getElementById("statusIndicator");
 
-recBtn.onclick = () => {
-  if (playing || paused) { updateStatus("Stop playback first"); return; }
-  if (recording)         { updateStatus("Already recording");   return; }
-  recording = true;
-  recordedPath = [];
-  recordingStartTime = performance.now();
-  recBtn.classList.add("recording");
-  recordingIndicator.classList.add("active");
-  saveBtn.disabled = false;
-  updateStatus("Recording... Press SAVE when done");
-};
-
-saveBtn.onclick = () => {
-  if (!recording) { updateStatus("Press REC first to record"); return; }
-  recording = false;
-  recBtn.classList.remove("recording");
-  recordingIndicator.classList.remove("active");
-  if (recordedPath.length > 0) {
-    updateStatus(`Saved! ${recordedPath.length} frames - Press PLAY`);
+function setRecSaveState(state) {
+  if (state === "rec") {
+    recSaveBtn.classList.remove("save-btn");
+    recSaveBtn.classList.add("rec-btn");
+    recSaveBtn.querySelector("i").className = "fa-solid fa-circle";
+    recSaveBtn.title = "Record";
   } else {
-    updateStatus("No movement recorded");
+    recSaveBtn.classList.remove("rec-btn");
+    recSaveBtn.classList.add("save-btn");
+    recSaveBtn.querySelector("i").className = "fa-solid fa-floppy-disk";
+    recSaveBtn.title = "Save";
+  }
+}
+
+recSaveBtn.onclick = () => {
+  if (playing || paused) { updateStatus("Stop playback first"); return; }
+
+  if (!recording) {
+    // → INICIAR GRABACIÓN
+    recording = true;
+    recordedPath = [];
+    recordingStartTime = performance.now();
+    recSaveBtn.classList.add("recording");
+    recordingIndicator.classList.add("active");
+    setRecSaveState("save");
+    updateStatus("Recording... Press SAVE when done");
+  } else {
+    // → GUARDAR GRABACIÓN
+    recording = false;
+    recSaveBtn.classList.remove("recording");
+    recordingIndicator.classList.remove("active");
+    setRecSaveState("rec");
+    if (recordedPath.length > 0) {
+      updateStatus(`Saved! ${recordedPath.length} frames - Press PLAY`);
+    } else {
+      updateStatus("No movement recorded");
+    }
   }
 };
 
 /* =====================
-   PLAYBACK
+   BOTÓN PLAY / PAUSE
+   Estado inicial : PLAY  → ícono play  , clase play-btn
+   Al reproducir  : PAUSE → ícono pause , clase pause-btn
 ===================== */
-const playBtn  = document.getElementById("playBtn");
-const pauseBtn = document.getElementById("pauseBtn");
-const resetBtn = document.getElementById("resetBtn");
+const playPauseBtn = document.getElementById("playPauseBtn");
+const resetBtn     = document.getElementById("resetBtn");
 
-playBtn.onclick = () => {
+function setPlayPauseState(state) {
+  if (state === "play") {
+    playPauseBtn.classList.remove("pause-btn");
+    playPauseBtn.classList.add("play-btn");
+    playPauseBtn.querySelector("i").className = "fa-solid fa-play";
+    playPauseBtn.title = "Play";
+  } else {
+    playPauseBtn.classList.remove("play-btn");
+    playPauseBtn.classList.add("pause-btn");
+    playPauseBtn.querySelector("i").className = "fa-solid fa-pause";
+    playPauseBtn.title = "Pause";
+  }
+}
+
+playPauseBtn.onclick = () => {
   if (recordedPath.length === 0) { updateStatus("Record a movement first");  return; }
   if (recording)                  { updateStatus("Save the recording first"); return; }
 
-  if (paused) {
-    paused  = false;
-    playing = true;
-    playbackStartTime = performance.now() - pausedElapsed;
-    playBtn.disabled  = true;
-    pauseBtn.disabled = false;
-    updateStatus("Playing...");
-    playRecordedPath();
+  if (playing) {
+    // → PAUSAR
+    pausedElapsed = performance.now() - playbackStartTime;
+    playing = false;
+    paused  = true;
+    if (playbackTimeout) { clearTimeout(playbackTimeout); playbackTimeout = null; }
+    setPlayPauseState("play");
+    updateStatus("Paused — Press PLAY to continue");
   } else {
-    playing        = true;
-    paused         = false;
-    pausedElapsed  = 0;
-    lastFrameIndex = 0;
-    playbackStartTime = performance.now();
-    playBtn.disabled  = true;
-    pauseBtn.disabled = false;
+    // → PLAY (desde inicio o desde pausa)
+    playing = true;
+    paused  = false;
+    if (!pausedElapsed) lastFrameIndex = 0;
+    playbackStartTime = performance.now() - (pausedElapsed || 0);
+    pausedElapsed = 0;
+    setPlayPauseState("pause");
     updateStatus("Playing...");
     playRecordedPath();
   }
-};
-
-pauseBtn.onclick = () => {
-  if (!playing) return;
-  pausedElapsed = performance.now() - playbackStartTime;
-  playing = false;
-  paused  = true;
-  if (playbackTimeout) { clearTimeout(playbackTimeout); playbackTimeout = null; }
-  playBtn.disabled  = false;
-  pauseBtn.disabled = true;
-  updateStatus("Paused — Press PLAY to continue");
 };
 
 resetBtn.onclick = () => {
   playing   = false;
   paused    = false;
   recording = false;
-  recordedPath    = [];
-  pausedElapsed   = 0;
-  lastFrameIndex  = 0;
+  recordedPath       = [];
+  pausedElapsed      = 0;
+  lastFrameIndex     = 0;
   recordingStartTime = 0;
   playbackStartTime  = 0;
   if (playbackTimeout) { clearTimeout(playbackTimeout); playbackTimeout = null; }
@@ -289,10 +304,10 @@ resetBtn.onclick = () => {
   robot.angle = initialRobotState.angle;
   applyRelativePosition();
   velocity = 0;
-  recBtn.classList.remove("recording");
+  recSaveBtn.classList.remove("recording");
   recordingIndicator.classList.remove("active");
-  playBtn.disabled  = false;
-  pauseBtn.disabled = true;
+  setRecSaveState("rec");
+  setPlayPauseState("play");
   updateStatus("Reset — Ready to record");
 };
 
@@ -363,7 +378,6 @@ document.addEventListener("click", e => {
     trackMenu.classList.remove("active");
 });
 
-// Pistas con imagen
 trackMenu.onclick = e => {
   const btn = e.target.closest("[data-track]");
   if (btn) {
@@ -374,7 +388,6 @@ trackMenu.onclick = e => {
   }
 };
 
-// Pista blanca
 document.getElementById("whiteTrackBtn").onclick = () => {
   whiteTrack = true;
   trackMenu.classList.remove("active");
@@ -452,8 +465,10 @@ function loop(currentTime) {
     else                         velocity *= Math.pow(FRICTION, dt);
 
     const rad = (robot.angle * Math.PI) / 180;
-    robot.x += Math.cos(rad) * velocity * dt;
-    robot.y += Math.sin(rad) * velocity * dt;
+    //Para velocidad
+    const shortSide = Math.min(trackBounds.width, trackBounds.height);
+    robot.x += Math.cos(rad) * velocity * dt * (shortSide / 500);
+    robot.y += Math.sin(rad) * velocity * dt * (shortSide / 500);
 
     const robotLong = Math.max(ROBOT_SIZE, ROBOT_H);
     const margin    = robotLong / 3;
@@ -483,7 +498,12 @@ function loop(currentTime) {
   robotImg.style.transform = `rotate(${robot.angle}deg)`;
 
   requestAnimationFrame(loop);
+
+  const ori = window.innerWidth >= window.innerHeight ? "L" : "P";
+  updateStatus(`${ori} rx:${robot.rx.toFixed(3)} ry:${robot.ry.toFixed(3)} a:${robot.angle.toFixed(1)} rot:${trackRotated}`);
 }
+
+//temporar para saber posicion
 
 /* =====================
    RESIZE
@@ -499,15 +519,23 @@ window.addEventListener("resize", () => {
   if (newOrientation !== lastOrientation) {
     const ox = robot.rx;
     const oy = robot.ry;
-    robot.rx = oy;
-    robot.ry = ox;
-    robot.angle += newOrientation === "landscape" ? -90 : 90;
+
+    if (newOrientation === "landscape") {
+      robot.rx = oy;
+      robot.ry = 1 - ox;
+      robot.angle -= 90;
+    } else {
+      robot.rx = 1 - oy;
+      robot.ry = ox;
+      robot.angle += 90;
+    }
+
     lastOrientation = newOrientation;
   }
 
-  updateTrackBounds();
-  applyRelativePosition();
-});
+    updateTrackBounds();
+    applyRelativePosition();
+  });
 
 /* =====================
    INIT

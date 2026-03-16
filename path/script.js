@@ -24,16 +24,6 @@ function getSTEP() {
 
 const RESTART_DELAY = 500;
 
-/* =====================
-   VELOCIDADES
-   5 niveles: step 1 (más lento) → step 5 (más rápido)
-   Edita los ms de cada nivel según prefieras:
-     step 1 = 1000ms  (tortuga máxima)
-     step 2 =  750ms  (lento)
-     step 3 =  500ms  (medio — default)
-     step 4 =  300ms  (rápido)
-     step 5 =  150ms  (liebre máxima)
-===================== */
 const SPEED_MAP = {
   1: 1000,
   2:  750,
@@ -42,7 +32,7 @@ const SPEED_MAP = {
   5:  150
 };
 
-let currentStep = 3; // default: medio
+let currentStep = 3;
 
 function getInterval() {
   return SPEED_MAP[currentStep];
@@ -59,13 +49,10 @@ function initSpeedControl() {
       currentStep = parseInt(dot.dataset.step);
       updateSpeedUI();
 
-      // Aplicar nueva velocidad si está reproduciendo O en pausa entre ciclos
       if (interval !== null) {
         clearInterval(interval);
         interval = setInterval(execute, getInterval());
       }
-      // Si está en el restartTimeout (entre ciclos), cancelarlo y relanzarlo
-      // para que el próximo ciclo use la nueva velocidad desde el inicio
       if (restartTimeout !== null) {
         clearTimeout(restartTimeout);
         restartTimeout = setTimeout(() => {
@@ -75,6 +62,7 @@ function initSpeedControl() {
           resetRobotInstant();
           interval = setInterval(execute, getInterval());
           updatePlayBtn();
+          updateDeleteBtn();
         }, RESTART_DELAY);
       }
     });
@@ -83,7 +71,6 @@ function initSpeedControl() {
 
 function updateSpeedUI() {
   const dots = document.querySelectorAll('.speed-dot');
-
   dots.forEach(dot => {
     const s = parseInt(dot.dataset.step);
     dot.classList.toggle('speed-dot--active', s === currentStep);
@@ -114,7 +101,7 @@ let restartTimeout = null;
 let isPaused           = false;
 let wasPlayingOnResize = false;
 let isResizing         = false;
-let sequenceEdited     = false; // true cuando se edita tras pausar
+let sequenceEdited     = false;
 
 /* =====================
    ÍCONO PLAY/PAUSE
@@ -144,11 +131,9 @@ let pathLocked   = false;
 
 /* =====================
    SNAPSHOT AL PAUSAR
-   Guarda estado exacto del robot e índice
-   para reanudar sin contaminar pathCommands
 ===================== */
-let pauseSnapshot  = null;
-let isBetweenCycles = false; // true solo durante el restartTimeout entre ciclos
+let pauseSnapshot   = null;
+let isBetweenCycles = false;
 
 /* =====================
    CALCULAR POSICIÓN
@@ -284,6 +269,8 @@ function right() {
 
 /* =====================
    DPAD VISUAL
+   FIX: no llama updateDeleteBtn aquí porque interval
+   aún no fue asignado en este punto del flujo
 ===================== */
 function setDpadEnabled(enabled) {
   document.querySelectorAll('.dpad-btn').forEach(btn => {
@@ -302,16 +289,15 @@ function stopPlayback() {
     clearTimeout(restartTimeout);
     restartTimeout = null;
   }
-  // Guardar estado exacto para reanudar limpio
   pauseSnapshot = {
-    x:              robot.x,
-    y:              robot.y,
-    dir:            robot.dir,
-    rot:            visualRotation,
-    idx:            index,
-    pathLocked:     pathLocked,
-    path:           pathCommands.slice(),
-    betweenCycles:  isBetweenCycles  // indica si pausó entre ciclos
+    x:             robot.x,
+    y:             robot.y,
+    dir:           robot.dir,
+    rot:           visualRotation,
+    idx:           index,
+    pathLocked:    pathLocked,
+    path:          pathCommands.slice(),
+    betweenCycles: isBetweenCycles
   };
   isBetweenCycles = false;
 }
@@ -329,7 +315,7 @@ function execute() {
 
     clearInterval(interval);
     interval = null;
-    isBetweenCycles = true; // entramos en la pausa entre ciclos
+    isBetweenCycles = true;
 
     restartTimeout = setTimeout(() => {
       restartTimeout = null;
@@ -339,6 +325,7 @@ function execute() {
       resetRobotInstant();
       interval = setInterval(execute, getInterval());
       updatePlayBtn();
+      updateDeleteBtn(); // FIX: interval ya asignado aquí
     }, RESTART_DELAY);
 
     return;
@@ -458,9 +445,7 @@ function updateDeleteBtn() {
   if (!deleteBtn) return;
   const playing = interval !== null || restartTimeout !== null;
   const canDel  = !playing && cursorPos > 0;
-  deleteBtn.disabled     = !canDel;
-  deleteBtn.style.opacity = canDel ? '1' : '0.35';
-  deleteBtn.style.cursor  = canDel ? 'pointer' : 'not-allowed';
+  deleteBtn.disabled = !canDel;
 }
 
 /* =====================
@@ -508,6 +493,7 @@ playBtn.onclick = () => {
     setDpadEnabled(true);
     renderSequence();
     updatePlayBtn();
+    updateDeleteBtn(); // FIX: interval ya es null aquí (stopPlayback lo limpió)
     return;
   }
 
@@ -519,7 +505,6 @@ playBtn.onclick = () => {
     isPaused = false;
 
     if (pauseSnapshot) {
-      // Pausó entre ciclos: reinicio limpio desde el centro
       if (pauseSnapshot.betweenCycles) {
         pathCommands  = [];
         loopCommands  = [];
@@ -532,10 +517,10 @@ playBtn.onclick = () => {
         renderSequence();
         interval = setInterval(execute, getInterval());
         updatePlayBtn();
+        updateDeleteBtn(); // FIX: interval ya asignado
         return;
       }
 
-      // Pausó a mitad de secuencia: restaurar estado exacto
       robotImg.style.transition = "none";
       robot.x        = pauseSnapshot.x;
       robot.y        = pauseSnapshot.y;
@@ -557,6 +542,7 @@ playBtn.onclick = () => {
     renderSequence();
     interval = setInterval(execute, getInterval());
     updatePlayBtn();
+    updateDeleteBtn(); // FIX: interval ya asignado
     return;
   }
 
@@ -577,6 +563,7 @@ playBtn.onclick = () => {
   renderSequence();
   interval = setInterval(execute, getInterval());
   updatePlayBtn();
+  updateDeleteBtn(); // FIX: interval ya asignado
 };
 
 resetBtn.onclick = () => {
@@ -592,12 +579,13 @@ resetBtn.onclick = () => {
   pauseSnapshot   = null;
   isBetweenCycles = false;
   wasPlayingOnResize = false;
-  isResizing     = false;
+  isResizing      = false;
   setDpadEnabled(true);
   resetRobotInstant();
   draw();
   renderSequence();
   updatePlayBtn();
+  updateDeleteBtn();
 };
 
 toggleSeqBtn.onclick = () => {
@@ -641,6 +629,7 @@ function initScene() {
   renderSequence();
   initSpeedControl();
   updatePlayBtn();
+  updateDeleteBtn();
 }
 
 /* =====================
@@ -685,10 +674,12 @@ window.addEventListener("resize", () => {
       wasPlayingOnResize = false;
       isPaused       = false;
       sequenceEdited = false;
-      interval  = setInterval(execute, getInterval());
+      interval = setInterval(execute, getInterval());
       updatePlayBtn();
+      updateDeleteBtn(); // FIX: interval ya asignado
     } else {
       updatePlayBtn();
+      updateDeleteBtn();
     }
   }, 200);
 });

@@ -9,7 +9,6 @@ const state = {
     currentStateIndex: 0,
     isPlaying:   false,
     playInterval: null,
-    editMode:    false,
     isPainting:  false,
     paintedLeds: new Set()
 };
@@ -22,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeColorPalette();
     initializeColorPaletteMobile();
     initializeCustomColorPicker();
-    initializeTools();
+    initializeClearButton();
     initializeLEDs();
     initializeTimeline();
     initializeModal();
@@ -159,18 +158,16 @@ function initializeLEDs() {
         const num = () => parseInt(led.dataset.led);
 
         led.addEventListener('mousedown', () => {
-            if (!state.editMode) return;
             state.isPainting = true;
             state.paintedLeds.clear();
             toggleLed(num());
         });
         led.addEventListener('mouseenter', () => {
-            if (!state.isPainting || !state.editMode) return;
+            if (!state.isPainting) return;
             if (!state.paintedLeds.has(num())) paintLed(num());
         });
 
         led.addEventListener('touchstart', e => {
-            if (!state.editMode) return;
             e.preventDefault();
             state.isPainting = true;
             state.paintedLeds.clear();
@@ -178,7 +175,7 @@ function initializeLEDs() {
         }, { passive: false });
 
         led.addEventListener('touchmove', e => {
-            if (!state.isPainting || !state.editMode) return;
+            if (!state.isPainting) return;
             e.preventDefault();
             const t = e.touches[0];
             const el = document.elementFromPoint(t.clientX, t.clientY);
@@ -233,28 +230,14 @@ function updateLEDDisplay() {
 }
 
 // ───────────────────────────────────────
-//  TOOLS (Edit / Clear)
+//  CLEAR TOOL
 // ───────────────────────────────────────
-function initializeTools() {
-    document.getElementById('editBtn')?.addEventListener('click', toggleEditMode);
+function initializeClearButton() {
     document.getElementById('clearBtn')?.addEventListener('click', clearAllLEDs);
-    document.getElementById('editBtnMobile')?.addEventListener('click', toggleEditMode);
     document.getElementById('clearBtnMobile')?.addEventListener('click', clearAllLEDs);
 }
 
-function toggleEditMode() {
-    state.editMode = !state.editMode;
-
-    ['editBtn', 'editBtnMobile'].forEach(id => {
-        const btn = document.getElementById(id);
-        if (!btn) return;
-        btn.style.background   = state.editMode ? 'var(--primary-blue-light)' : '';
-        btn.style.borderColor  = state.editMode ? 'var(--primary-blue)' : '';
-    });
-}
-
 function clearAllLEDs() {
-    if (!state.editMode) return;
     for (let i = 1; i <= 5; i++) applyColorToLed(i, '#9E9E9E');
     updateCurrentState();
 }
@@ -299,7 +282,6 @@ function renderStates() {
     addBtn.className = 'add-state-btn';
     addBtn.innerHTML = '<i class="fa-solid fa-plus"></i><span>New</span>';
     addBtn.addEventListener('click', () => {
-        if (!state.editMode) return;
         addNewState();
         renderStates();
         scrollToState(state.states.length - 1);
@@ -351,7 +333,7 @@ function createStateThumbnail(stateData, index) {
     const del = document.createElement('button');
     del.className = 'state-thumbnail-delete';
     del.innerHTML = '<i class="fa-solid fa-xmark"></i>';
-    del.addEventListener('click', e => { e.stopPropagation(); if (state.editMode) deleteState(index); });
+    del.addEventListener('click', e => { e.stopPropagation(); deleteState(index); });
 
     thumb.appendChild(ledsDiv);
     thumb.appendChild(info);
@@ -472,32 +454,26 @@ function initializeKeyboard() {
                 }
                 break;
 
-            case 'e':
-                e.preventDefault();
-                toggleEditMode();
-                break;
-
             case 'n':
                 e.preventDefault();
-                if (state.editMode) { addNewState(); renderStates(); }
+                addNewState();
+                renderStates();
                 break;
 
             case 'Delete':
                 e.preventDefault();
-                if (state.editMode) deleteState(state.currentStateIndex);
+                deleteState(state.currentStateIndex);
                 break;
 
             case '1': case '2': case '3': case '4': case '5':
-                if (state.editMode) {
-                    e.preventDefault();
-                    const n = parseInt(e.key);
-                    toggleLed(n);
-                    updateCurrentState();
-                }
+                e.preventDefault();
+                const n = parseInt(e.key);
+                toggleLed(n);
+                updateCurrentState();
                 break;
         }
     });
 }
 
-console.log('CyberPi LED Sequencer v5 ✅');
-console.log('Atajos: Space=play | ←→=estados | E=edit | N=nuevo | Del=borrar | 1-5=LED');
+console.log('CyberPi LED Sequencer v6 - Always Editable ✅');
+console.log('Atajos: Space=play | ←→=estados | N=nuevo | Del=borrar | 1-5=LED');

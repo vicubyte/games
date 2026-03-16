@@ -210,14 +210,15 @@ canvas {
 }
 .control-btn:hover  { transform: scale(1.05); box-shadow: var(--shadow-md); }
 .control-btn:active { transform: scale(0.95); }
-.control-btn:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+.control-btn:disabled { background: #f0f0f0; border-color: #d0d0d0; cursor: not-allowed; transform: none; box-shadow: none; opacity: 0.4; }
+.control-btn:disabled i { color: #bdbdbd; }
 
-.play-btn:hover  { background:#E8F5E9; border-color:#4CAF50; }
-.play-btn:hover i  { color:#4CAF50; }
-.pause-btn:hover { background:#FFF3E0; border-color:#FF9800; }
-.pause-btn:hover i { color:#FF9800; }
-.reset-btn:hover { background:#FFEBEE; border-color:#F44336; }
-.reset-btn:hover i { color:#F44336; }
+.play-btn:not(:disabled):hover  { background:#E8F5E9; border-color:#4CAF50; }
+.play-btn:not(:disabled):hover i  { color:#4CAF50; }
+.pause-btn:not(:disabled):hover { background:#FFF3E0; border-color:#FF9800; }
+.pause-btn:not(:disabled):hover i { color:#FF9800; }
+.reset-btn:not(:disabled):hover { background:#FFEBEE; border-color:#F44336; }
+.reset-btn:not(:disabled):hover i { color:#F44336; }
 
 .circle-btn {
   width:  var(--btn-size);

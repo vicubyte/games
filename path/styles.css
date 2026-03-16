@@ -246,7 +246,7 @@ canvas {
 .dpad-btn:hover i { color: var(--primary-blue); }
 .dpad-btn:active { transform: scale(0.95); background: var(--primary-blue-light); border-color: var(--primary-blue); }
 .dpad-btn:active i { color: var(--primary-blue); }
-.dpad-btn:disabled { background: #f0f0f0; border-color: #d0d0d0; cursor: not-allowed; transform: none; box-shadow: none; }
+.dpad-btn:disabled { background: #f0f0f0; border-color: #d0d0d0; cursor: not-allowed; transform: none; box-shadow: none; opacity: 0.4; }
 .dpad-btn:disabled i { color: #bdbdbd; }
 
 /* ===========================
@@ -354,8 +354,8 @@ canvas {
 .delete-btn:not(:disabled):hover { background: var(--primary-blue); border-color: var(--primary-blue-hover); transform: scale(1.05); box-shadow: var(--shadow-md); }
 .delete-btn:not(:disabled):hover i { color: #ffffff; }
 .delete-btn:not(:disabled):active { transform: scale(0.95); }
-.delete-btn:disabled { border-color: var(--border-color); cursor: not-allowed; }
-.delete-btn:disabled i { color: var(--text-muted); }
+.delete-btn:disabled { background: #f0f0f0; border-color: #d0d0d0; cursor: not-allowed; transform: none; box-shadow: none; }
+.delete-btn:disabled i { color: #bdbdbd; }
 
 /* ===========================
    RESPONSIVE - Tablet

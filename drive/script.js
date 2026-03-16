@@ -130,9 +130,9 @@ function centerRobotOnTrack() {
 /* =====================
    MOVIMIENTO
 ===================== */
-const MAX_SPEED    = 1.5;/*1.5*/
+const MAX_SPEED    = 1.5;
 const TURN_SPEED   = 1.2;
-const ACCELERATION = 0.08;/*0.08*/
+const ACCELERATION = 0.08;
 const FRICTION     = 0.90;
 let velocity = 0;
 
@@ -194,9 +194,15 @@ Object.keys(dpadMap).forEach(id => {
 });
 
 /* =====================
+   BOTÓN PLAY/PAUSE — estado habilitado
+===================== */
+function updatePlayPauseBtn() {
+  const canPlay = recordedPath.length > 0 && !recording;
+  playPauseBtn.disabled = !canPlay;
+}
+
+/* =====================
    BOTÓN REC / SAVE
-   Estado inicial : REC  → ícono circle rojo  , clase rec-btn
-   Al grabar      : SAVE → ícono floppy verde , clase save-btn
 ===================== */
 const recSaveBtn         = document.getElementById("recSaveBtn");
 const recordingIndicator = document.getElementById("recordingIndicator");
@@ -228,6 +234,7 @@ recSaveBtn.onclick = () => {
     recordingIndicator.classList.add("active");
     setRecSaveState("save");
     updateStatus("Recording... Press SAVE when done");
+    updatePlayPauseBtn();
   } else {
     // → GUARDAR GRABACIÓN
     recording = false;
@@ -239,13 +246,12 @@ recSaveBtn.onclick = () => {
     } else {
       updateStatus("No movement recorded");
     }
+    updatePlayPauseBtn();
   }
 };
 
 /* =====================
    BOTÓN PLAY / PAUSE
-   Estado inicial : PLAY  → ícono play  , clase play-btn
-   Al reproducir  : PAUSE → ícono pause , clase pause-btn
 ===================== */
 const playPauseBtn = document.getElementById("playPauseBtn");
 const resetBtn     = document.getElementById("resetBtn");
@@ -309,6 +315,7 @@ resetBtn.onclick = () => {
   setRecSaveState("rec");
   setPlayPauseState("play");
   updateStatus("Reset — Ready to record");
+  updatePlayPauseBtn();
 };
 
 /* =====================
@@ -465,7 +472,6 @@ function loop(currentTime) {
     else                         velocity *= Math.pow(FRICTION, dt);
 
     const rad = (robot.angle * Math.PI) / 180;
-    //Para velocidad
     const shortSide = Math.min(trackBounds.width, trackBounds.height);
     robot.x += Math.cos(rad) * velocity * dt * (shortSide / 500);
     robot.y += Math.sin(rad) * velocity * dt * (shortSide / 500);
@@ -498,12 +504,7 @@ function loop(currentTime) {
   robotImg.style.transform = `rotate(${robot.angle}deg)`;
 
   requestAnimationFrame(loop);
-
-  const ori = window.innerWidth >= window.innerHeight ? "L" : "P";
-  updateStatus(`${ori} rx:${robot.rx.toFixed(3)} ry:${robot.ry.toFixed(3)} a:${robot.angle.toFixed(1)} rot:${trackRotated}`);
 }
-
-//temporar para saber posicion
 
 /* =====================
    RESIZE
@@ -533,9 +534,9 @@ window.addEventListener("resize", () => {
     lastOrientation = newOrientation;
   }
 
-    updateTrackBounds();
-    applyRelativePosition();
-  });
+  updateTrackBounds();
+  applyRelativePosition();
+});
 
 /* =====================
    INIT
@@ -543,6 +544,7 @@ window.addEventListener("resize", () => {
 function init() {
   updateTrackBounds();
   centerRobotOnTrack();
+  updatePlayPauseBtn();
 }
 
 let bgReady    = bg.complete       && bg.naturalWidth    > 0;

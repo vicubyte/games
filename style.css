@@ -204,9 +204,10 @@ html, body {
 }
 
 /* ============================================================
-   MÓVIL / PORTRAIT  ≤ 768px
+   PORTRAIT — pantalla vertical → cajas apiladas
+   Se activa cuando la altura > ancho (cualquier dispositivo)
 ============================================================ */
-@media (max-width: 768px) {
+@media (orientation: portrait) {
     .container { padding: 0 clamp(12px, 3vw, 24px); }
     .header { height: 20vh; }
 
@@ -216,7 +217,7 @@ html, body {
         gap: 12px;
     }
 
-    /* Tarjeta horizontal — padding uniforme, flecha en flujo */
+    /* Tarjeta horizontal — icono izq, texto der, flecha al final */
     .program-card {
         flex-direction: row;
         justify-content: flex-start;
@@ -262,7 +263,6 @@ html, body {
         text-overflow: ellipsis;
     }
 
-    /* Flecha en flujo normal: imposible que tape el texto */
     .program-arrow {
         position: static;
         bottom: unset; right: unset;
@@ -276,8 +276,41 @@ html, body {
     }
 }
 
-/* ── Landscape compacto ── */
-@media (max-height: 500px) and (orientation: landscape) {
-    .header { height: 20vh; }
-    .program-card { padding: 10px 14px clamp(38px, 5.5vh, 50px); }
+/* ============================================================
+   LANDSCAPE con altura pequeña — móviles en horizontal
+   (ej: iPhone en landscape tiene ~390px de alto)
+   Reduce tamaños para que todo quepa sin cortes
+============================================================ */
+@media (orientation: landscape) and (max-height: 500px) {
+    .container { padding: 0 clamp(10px, 2vw, 20px); }
+
+    .header { height: 15vh; }
+
+    .programs-grid {
+        gap: clamp(8px, 1.5vw, 16px);
+        max-height: none;
+    }
+
+    .program-card {
+        padding: clamp(10px, 2vh, 18px) 14px clamp(32px, 5vh, 44px);
+    }
+
+    .program-number {
+        width: 24px; height: 24px;
+        font-size: 0.7rem;
+        top: 10px; left: 10px;
+    }
+
+    .program-icon {
+        width: clamp(44px, 7vh, 60px);
+        height: clamp(44px, 7vh, 60px);
+    }
+
+    .program-icon i { font-size: clamp(20px, 3.5vh, 30px); }
+
+    .program-title { font-size: clamp(0.85rem, 1.8vh, 1.1rem); }
+
+    .program-description { font-size: clamp(0.7rem, 1.3vh, 0.85rem); }
+
+    .footer { font-size: 0.65rem; padding: 4px 0; }
 }

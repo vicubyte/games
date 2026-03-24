@@ -123,8 +123,37 @@ function centerRobotOnTrack() {
   robot.rx = 0.5;
   robot.ry = 0.5;
   applyRelativePosition();
-  initialRobotState.rx = robot.rx;
-  initialRobotState.ry = robot.ry;
+  initialRobotState.rx    = robot.rx;
+  initialRobotState.ry    = robot.ry;
+  initialRobotState.angle = robot.angle;
+}
+
+/* =====================
+   ORIENTACIÓN
+   Guardamos la orientación de grabación de cada frame.
+   Al reproducir en orientación distinta, transformamos
+   rx, ry y angle igual que hace el resize.
+===================== */
+function currentOrientation() {
+  return window.innerWidth >= window.innerHeight ? "landscape" : "portrait";
+}
+
+function transformFrameToOrientation(frame, fromOri, toOri) {
+  if (fromOri === toOri) return frame;
+
+  let { rx, ry, angle } = frame;
+
+  if (toOri === "landscape") {
+    // portrait → landscape
+    const nx = ry;
+    const ny = 1 - rx;
+    return { rx: nx, ry: ny, angle: angle - 90 };
+  } else {
+    // landscape → portrait
+    const nx = 1 - ry;
+    const ny = rx;
+    return { rx: nx, ry: ny, angle: angle + 90 };
+  }
 }
 
 /* =====================
@@ -159,10 +188,11 @@ document.addEventListener("keyup", e => {
 });
 
 /* =====================
-   REPRODUCCIÓN / PAUSA
+   ESTADO PLAYBACK
 ===================== */
 let recording          = false;
 let recordedPath       = [];
+let recordingOrientation = "portrait"; // orientación al momento de grabar
 let playing            = false;
 let paused             = false;
 let pausedElapsed      = 0;
@@ -226,9 +256,10 @@ recSaveBtn.onclick = () => {
   if (playing || paused) { updateStatus("Stop playback first"); return; }
 
   if (!recording) {
-    // → INICIAR GRABACIÓN
+    // → INICIAR GRABACIÓN — guardar orientación actual
     recording = true;
     recordedPath = [];
+    recordingOrientation = currentOrientation();
     recordingStartTime = performance.now();
     recSaveBtn.classList.add("recording");
     recordingIndicator.classList.add("active");
@@ -320,9 +351,13 @@ resetBtn.onclick = () => {
 
 /* =====================
    FUNCIÓN DE REPRODUCCIÓN
+   Convierte cada frame grabado a la orientación actual
+   antes de aplicarlo al robot.
 ===================== */
 function playRecordedPath() {
   if (!playing || !recordedPath.length) return;
+
+  const playOri = currentOrientation();
   const elapsed = performance.now() - playbackStartTime;
 
   while (lastFrameIndex < recordedPath.length - 1 &&
@@ -331,9 +366,13 @@ function playRecordedPath() {
   }
 
   if (lastFrameIndex >= recordedPath.length - 1) {
-    const last = recordedPath[recordedPath.length - 1];
-    robot.x = last.x; robot.y = last.y; robot.angle = last.angle;
-    saveRelativePosition();
+    const last = transformFrameToOrientation(
+      recordedPath[recordedPath.length - 1],
+      recordingOrientation,
+      playOri
+    );
+    robot.rx = last.rx; robot.ry = last.ry; robot.angle = last.angle;
+    applyRelativePosition();
     updateStatus("Waiting to repeat...");
     lastFrameIndex = 0; pausedElapsed = 0;
     playbackTimeout = setTimeout(() => {
@@ -346,19 +385,23 @@ function playRecordedPath() {
     return;
   }
 
-  const f1 = recordedPath[lastFrameIndex];
-  const f2 = recordedPath[Math.min(lastFrameIndex + 1, recordedPath.length - 1)];
+  const raw1 = recordedPath[lastFrameIndex];
+  const raw2 = recordedPath[Math.min(lastFrameIndex + 1, recordedPath.length - 1)];
 
-  if (!f1 || !f2 || f2.time === f1.time) {
-    if (f1) { robot.x = f1.x; robot.y = f1.y; robot.angle = f1.angle; }
+  const f1 = transformFrameToOrientation(raw1, recordingOrientation, playOri);
+  const f2 = transformFrameToOrientation(raw2, recordingOrientation, playOri);
+
+  if (!f1 || !f2 || raw2.time === raw1.time) {
+    if (f1) { robot.rx = f1.rx; robot.ry = f1.ry; robot.angle = f1.angle; applyRelativePosition(); }
   } else {
-    const st = Math.min(Math.max((elapsed - f1.time) / (f2.time - f1.time), 0), 1);
-    robot.x = f1.x + (f2.x - f1.x) * st;
-    robot.y = f1.y + (f2.y - f1.y) * st;
+    const st = Math.min(Math.max((elapsed - raw1.time) / (raw2.time - raw1.time), 0), 1);
+    robot.rx = f1.rx + (f2.rx - f1.rx) * st;
+    robot.ry = f1.ry + (f2.ry - f1.ry) * st;
     let da = f2.angle - f1.angle;
     while (da >  180) da -= 360;
     while (da < -180) da += 360;
     robot.angle = f1.angle + da * st;
+    applyRelativePosition();
   }
 
   saveRelativePosition();
@@ -494,7 +537,8 @@ function loop(currentTime) {
     if (recording) {
       const t = performance.now() - recordingStartTime;
       if (!recordedPath.length || Math.abs(velocity) > 0.01 || keys["ArrowLeft"] || keys["ArrowRight"]) {
-        recordedPath.push({ x: robot.x, y: robot.y, angle: robot.angle, time: t });
+        // Guardar en coordenadas relativas
+        recordedPath.push({ rx: robot.rx, ry: robot.ry, angle: robot.angle, time: t });
       }
     }
   }

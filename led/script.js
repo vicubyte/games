@@ -83,10 +83,6 @@ function updateCustomColorDisplay() {
 
 // ───────────────────────────────────────
 //  CUSTOM COLOR PICKER
-//
-//  Dos círculos separados (desktop + mobile):
-//    - Círculo paleta (editar)   → abre el picker
-//    - Círculo color actual      → selecciona el color personalizado
 // ───────────────────────────────────────
 function initializeCustomColorPicker() {
     const picker = document.getElementById('colorPicker');
@@ -101,13 +97,11 @@ function initializeCustomColorPicker() {
         selectBtnMobile.addEventListener('click', () => selectColor(state.customColor));
     }
 
-    // Actualización en tiempo real
     picker.addEventListener('input', e => {
         state.customColor = e.target.value;
         updateCustomColorDisplay();
     });
 
-    // Confirma color al cerrar
     picker.addEventListener('change', e => {
         state.customColor = e.target.value;
         updateCustomColorDisplay();
@@ -115,7 +109,6 @@ function initializeCustomColorPicker() {
     });
 }
 
-// ── Oculta el picker fuera de pantalla ──
 function hidePicker() {
     const picker = document.getElementById('colorPicker');
     picker.style.left   = '-9999px';
@@ -124,7 +117,6 @@ function hidePicker() {
     picker.style.height = '1px';
 }
 
-// ── Abre el picker posicionado junto al botón ──
 function openColorPicker(referenceBtn) {
     const picker = document.getElementById('colorPicker');
     const rect   = referenceBtn.getBoundingClientRect();
@@ -339,11 +331,51 @@ function createStateThumbnail(stateData, index) {
     thumb.appendChild(info);
     thumb.appendChild(del);
 
-    thumb.addEventListener('click', () => {
-        state.currentStateIndex = index;
-        loadCurrentState(); renderStates();
+    // ── FIX iOS: usar touchend + preventDefault para evitar el delay de 300ms
+    //    y el comportamiento errático del click en Safari/iOS.
+    //    El click normal se mantiene como fallback para desktop.
+    let touchMoved = false;
+
+    thumb.addEventListener('touchstart', () => {
+        touchMoved = false;
+    }, { passive: true });
+
+    thumb.addEventListener('touchmove', () => {
+        touchMoved = true;
+    }, { passive: true });
+
+    thumb.addEventListener('touchend', e => {
+        if (touchMoved) return; // fue un scroll, no un tap
+        e.preventDefault();    // cancela el click sintético que iOS dispararía después
+        selectState(index);
     });
+
+    // Fallback para desktop (mouse)
+    thumb.addEventListener('click', e => {
+        // En iOS este click sintético ya fue cancelado por preventDefault en touchend,
+        // así que solo llega aquí en dispositivos de escritorio reales.
+        selectState(index);
+    });
+
     return thumb;
+}
+
+// ── Selecciona un estado: actualiza índice, LEDs y resaltado visual
+//    SIN reconstruir todo el DOM de la timeline ──
+function selectState(index) {
+    if (index === state.currentStateIndex) return; // ya está seleccionado, nada que hacer
+
+    state.currentStateIndex = index;
+
+    // 1. Actualiza los LEDs inmediatamente
+    loadCurrentState();
+
+    // 2. Actualiza solo la clase .active en los thumbnails (sin re-renderizar)
+    const thumbs = document.querySelectorAll('#statesTimeline .state-thumbnail');
+    thumbs.forEach((t, i) => t.classList.toggle('active', i === index));
+
+    // 3. Hace scroll al estado seleccionado
+    scrollToState(index);
 }
 
 function loadCurrentState() {
@@ -418,7 +450,12 @@ function stopPlayback() {
 
 function playSequence() {
     if (!state.isPlaying) return;
-    loadCurrentState(); renderStates();
+    loadCurrentState();
+    // Actualiza el resaltado visual sin re-renderizar todo
+    const thumbs = document.querySelectorAll('#statesTimeline .state-thumbnail');
+    thumbs.forEach((t, i) => t.classList.toggle('active', i === state.currentStateIndex));
+    scrollToState(state.currentStateIndex);
+
     const dur = (state.states[state.currentStateIndex].duration || 1) * 1000;
     state.playInterval = setTimeout(() => {
         state.currentStateIndex = (state.currentStateIndex + 1) % state.states.length;
@@ -475,5 +512,5 @@ function initializeKeyboard() {
     });
 }
 
-console.log('CyberPi LED Sequencer v6 - Always Editable ✅');
+console.log('CyberPi LED Sequencer v6 - iOS fix ✅');
 console.log('Atajos: Space=play | ←→=estados | N=nuevo | Del=borrar | 1-5=LED');
